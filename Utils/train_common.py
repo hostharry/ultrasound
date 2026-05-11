@@ -450,10 +450,14 @@ def _probe_xz(probe_geometry):
     geom = np.asarray(probe_geometry)
     if geom.ndim != 2:
         raise ValueError("probe_geometry must be 2D")
-    if geom.shape[1] >= 2:
-        return geom[:, 0], geom[:, 1]
+    if geom.shape[0] >= 3:
+        return geom[0], geom[2]
+    if geom.shape[1] >= 3:
+        return geom[:, 0], geom[:, 2]
     if geom.shape[0] >= 2:
         return geom[0], geom[1]
+    if geom.shape[1] >= 2:
+        return geom[:, 0], geom[:, 1]
     return geom.reshape(-1), np.zeros(geom.size, dtype=geom.dtype)
 
 
