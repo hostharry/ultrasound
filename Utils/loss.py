@@ -103,13 +103,19 @@ def msle(pred, gt, weight=None):
 def kld_db_distribution(pred, gt, alpha_db: float = -60.0, *,
                         low_db: float = -60.0, high_db: float = 0.0,
                         n_bins: int = 40, eta: float = 0.5,
-                        eps: float = 1e-8, var_floor: float = 0.01):
+                        eps: float = 1e-8, var_floor: float = 0.01,
+                        kld_cap: float = 50.0):
     """高斯近似 KLD: 假设 dB 分布近似高斯, 用解析公式替代软直方图.
 
     D_KL(p || q) = log(σ_q/σ_p) + (σ_p² + (μ_p - μ_q)²) / (2σ_q²) - 1/2
 
     复杂度从 O(B·M·K) 降到 O(B·M), 显存和耗时降低约 K=40 倍.
     `low_db / high_db / n_bins / eta / eps` 保留以兼容老接口, 不再使用.
+
+    `kld_cap` 控制软上限: 用 cap·tanh(kld/cap) 替代 hard clamp,
+    KLD<10 时几乎线性 (<3% 误差), KLD→∞ 渐近 cap 但梯度处处非零,
+    避免 hard clamp 顶到上限后零梯度死区导致的不可恢复塌陷.
+    `kld_cap<=0` 则关闭软上限 (用于调试).
     """
     pred_db = _db_magnitude(pred, alpha_db=alpha_db)
     gt_db = _db_magnitude(gt.detach(), alpha_db=alpha_db)
@@ -126,7 +132,9 @@ def kld_db_distribution(pred, gt, alpha_db: float = -60.0, *,
     kld = (torch.log(var_q.sqrt() / var_p.sqrt())
            + (var_p + (mu_p - mu_q).pow(2)) / (2.0 * var_q)
            - 0.5)
-    return kld.clamp(max=50.0).mean()
+    if kld_cap and kld_cap > 0:
+        kld = kld_cap * torch.tanh(kld / kld_cap)
+    return kld.mean()
 
 
 def kld_mslae_loss(pred, gt, alpha_db=-60.0, beta_kld=0.5,
