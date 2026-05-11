@@ -1,0 +1,94 @@
+fista_dwt_lite_2d 2D Training | Lite2D_invivo_vol002_6regions_F200_A4_frames_20260416_022945
+  layers=4, params=4,184,704
+  amp=True
+  DAS image loss: gamma=0.1, mode=kld_mslae, datasets=1/1
+  d_model=32, num_conv_blocks=2, conv_ks=5, dwt_levels=1
+  hasa: type=conv, hidden=16, num_layers=2, kernel=5, base_ch=16
+  patch_h=999, patch_stride=16
+  datasets=1, train=3740, val=660
+
+[Epoch    1/300] Train: 0.538147 (1.83dB) | Val: 0.374215 (4.92dB, init:0.70) NMSE:0.339595 | RF:0.34486 Env:0.01645 KLD:0.14523 DAS:0.13183 BmPSNR:16.00 BmSSIM:0.2146 Con:0.00000 | LR:0.000500 | 391.2s
+         rho1=0.972 rho2=0.972 eta=0.6997
+  ** New best DAS PSNR: 16.00 dB @ Epoch 1
+  ** New best DAS PSNR: 16.91 dB @ Epoch 2
+  ** New best DAS PSNR: 17.28 dB @ Epoch 4
+[Epoch    5/300] Train: 0.330847 (9.62dB) | Val: 0.330861 (9.78dB, init:0.70) NMSE:0.113824 | RF:0.31057 Env:0.01110 KLD:0.08252 DAS:0.10927 BmPSNR:17.59 BmSSIM:0.2618 Con:0.00000 | LR:0.000500 | 388.8s
+         rho1=1.070 rho2=1.070 eta=0.6971
+  ** New best DAS PSNR: 17.59 dB @ Epoch 5
+  ** New best DAS PSNR: 17.98 dB @ Epoch 9
+[Epoch   10/300] Train: 0.318964 (10.47dB) | Val: 0.323695 (9.87dB, init:0.70) NMSE:0.112579 | RF:0.30139 Env:0.01130 KLD:0.10147 DAS:0.11027 BmPSNR:16.98 BmSSIM:0.2778 Con:0.00000 | LR:0.000499 | 388.9s
+         rho1=1.127 rho2=1.127 eta=0.6936
+[Epoch   15/300] Train: 0.314159 (10.89dB) | Val: 0.316330 (11.22dB, init:0.70) NMSE:0.083514 | RF:0.29752 Env:0.00989 KLD:0.07625 DAS:0.10193 BmPSNR:17.99 BmSSIM:0.2762 Con:0.00000 | LR:0.000497 | 388.7s
+         rho1=1.143 rho2=1.143 eta=0.6851
+  ** New best DAS PSNR: 17.99 dB @ Epoch 15
+  ** New best DAS PSNR: 18.07 dB @ Epoch 18
+[Epoch   20/300] Train: 0.310996 (11.17dB) | Val: 0.313184 (11.25dB, init:0.70) NMSE:0.083011 | RF:0.29408 Env:0.00993 KLD:0.08035 DAS:0.10075 BmPSNR:17.95 BmSSIM:0.2837 Con:0.00000 | LR:0.000495 | 391.6s
+         rho1=1.151 rho2=1.151 eta=0.6698
+  ** New best DAS PSNR: 18.15 dB @ Epoch 22
+[Epoch   25/300] Train: 0.308623 (11.34dB) | Val: 0.311514 (11.29dB, init:0.70) NMSE:0.082228 | RF:0.29338 Env:0.00985 KLD:0.07177 DAS:0.09970 BmPSNR:18.07 BmSSIM:0.2845 Con:0.00000 | LR:0.000492 | 388.6s
+         rho1=1.157 rho2=1.157 eta=0.6492
+  ** New best DAS PSNR: 18.16 dB @ Epoch 26
+[Epoch   30/300] Train: 0.307038 (11.46dB) | Val: 0.310288 (11.24dB, init:0.70) NMSE:0.083458 | RF:0.29155 Env:0.00997 KLD:0.07917 DAS:0.09825 BmPSNR:18.04 BmSSIM:0.2891 Con:0.00000 | LR:0.000488 | 388.5s
+         rho1=1.163 rho2=1.163 eta=0.6232
+[Epoch   35/300] Train: 0.305863 (11.57dB) | Val: 0.314751 (11.07dB, init:0.70) NMSE:0.086446 | RF:0.29783 Env:0.00985 KLD:0.05538 DAS:0.10399 BmPSNR:17.97 BmSSIM:0.2809 Con:0.00000 | LR:0.000484 | 388.3s
+         rho1=1.170 rho2=1.170 eta=0.5952
+[Epoch   40/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000479 | 386.1s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   45/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000473 | 386.4s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   50/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000467 | 387.4s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   55/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000460 | 386.7s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   60/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000453 | 386.7s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   65/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000445 | 386.7s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   70/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000436 | 387.8s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   75/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000428 | 387.5s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   80/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000418 | 387.9s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   85/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000408 | 387.1s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   90/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000398 | 387.7s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch   95/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000387 | 387.5s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  100/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000376 | 389.0s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  105/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000365 | 391.6s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  110/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000353 | 387.9s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  115/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000341 | 387.4s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  120/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000329 | 388.9s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  125/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000317 | 387.6s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  130/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000304 | 387.7s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  135/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000291 | 389.0s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  140/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000278 | 390.0s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  145/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000265 | 388.0s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  150/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000252 | 387.9s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  155/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000240 | 388.4s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  160/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000227 | 388.0s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  165/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000214 | 389.9s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  170/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000201 | 387.9s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  175/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000188 | 391.4s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  180/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000176 | 388.6s
+         rho1=1.168 rho2=1.168 eta=0.5940
+[Epoch  185/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000164 | 387.4s
+         rho1=1.168 rho2=1.168 eta=0.5940

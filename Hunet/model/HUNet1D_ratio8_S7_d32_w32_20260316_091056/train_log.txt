@@ -1,0 +1,5 @@
+HUNet-1D Training | HUNet1D_ratio8_S7_d32_w32_20260316_091056
+  stages=7, depth=4, params=2,515,268
+  embed_dim=32, nhead=4, window_size=32, mlp_ratio=2.0, swin_depth=2
+  samples=2000, train=1774, val=226
+

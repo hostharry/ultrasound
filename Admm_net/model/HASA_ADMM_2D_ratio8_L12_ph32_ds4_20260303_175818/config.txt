@@ -1,0 +1,23 @@
+npz: ['picmus_simu_reso_frames.npz', 'picmus_simu_cont_frames.npz', 'picmus_expe_reso_frames.npz', 'picmus_expe_cont_frames.npz']
+cs_ratio: 8
+val_ratio: 0.15
+split_mode: group
+seed: 42
+layers: 12
+hasa_hidden: 24
+num_hasa_layers: 2
+share_W: True
+gamma_env: 0.1
+gamma_constraint: 0.01
+use_log_env: False
+epochs: 300
+batch_size: 4
+lr: 0.0005
+weight_decay: 0.0001
+grad_clip: 1.0
+gpu: 0
+save_dir: model
+log_interval: 5
+save_interval: 50
+patch_h: 32
+patch_stride: None

@@ -1,0 +1,41 @@
+HASA-ADMM-Net 2D Training | HASA_ADMM_2D_ratio8_L12_ph32_ds4_20260303_071737
+  layers=12, patch_h=32, params=79,368
+  datasets=4, train=588, val=112
+  gamma_env=0.1, gamma_constraint=0.01
+
+[Epoch    1/300] Train: 0.002578 (1.32dB) | Val: 0.002237 (2.32dB, init:0.51) NMSE:0.618744 | RF:0.00080 Env:0.01424 Con:0.00104 | LR:0.000500 | 58.3s
+         rho1=0.310 rho2=0.334 eta=0.1358 gamma=0.693
+[Epoch    5/300] Train: 0.001928 (2.60dB) | Val: 0.001940 (2.94dB, init:0.51) NMSE:0.562881 | RF:0.00065 Env:0.01272 Con:0.00186 | LR:0.000500 | 57.0s
+         rho1=0.278 rho2=0.412 eta=0.1727 gamma=0.693
+[Epoch   10/300] Train: 0.001910 (2.62dB) | Val: 0.001914 (3.02dB, init:0.51) NMSE:0.552581 | RF:0.00065 Env:0.01252 Con:0.00140 | LR:0.000499 | 58.3s
+         rho1=0.250 rho2=0.457 eta=0.2171 gamma=0.693
+[Epoch   15/300] Train: 0.001891 (2.66dB) | Val: 0.001908 (3.00dB, init:0.51) NMSE:0.553177 | RF:0.00065 Env:0.01245 Con:0.00161 | LR:0.000497 | 58.4s
+         rho1=0.234 rho2=0.429 eta=0.2486 gamma=0.693
+[Epoch   20/300] Train: 0.001881 (2.66dB) | Val: 0.001923 (2.95dB, init:0.51) NMSE:0.558384 | RF:0.00065 Env:0.01252 Con:0.00194 | LR:0.000495 | 56.0s
+         rho1=0.220 rho2=0.396 eta=0.2686 gamma=0.693
+[Epoch   25/300] Train: 0.001875 (2.71dB) | Val: 0.001889 (3.06dB, init:0.51) NMSE:0.546721 | RF:0.00064 Env:0.01233 Con:0.00155 | LR:0.000492 | 55.3s
+         rho1=0.211 rho2=0.380 eta=0.2875 gamma=0.693
+[Epoch   30/300] Train: 0.001916 (2.64dB) | Val: 0.001943 (2.93dB, init:0.51) NMSE:0.555573 | RF:0.00067 Env:0.01256 Con:0.00181 | LR:0.000488 | 55.7s
+         rho1=0.203 rho2=0.382 eta=0.3125 gamma=0.693
+[Epoch   35/300] Train: 0.001879 (2.74dB) | Val: 0.001900 (3.07dB, init:0.51) NMSE:0.544173 | RF:0.00065 Env:0.01233 Con:0.00201 | LR:0.000484 | 55.9s
+         rho1=0.199 rho2=0.382 eta=0.3304 gamma=0.693
+[Epoch   40/300] Train: 0.001902 (2.71dB) | Val: 0.001911 (3.06dB, init:0.51) NMSE:0.544978 | RF:0.00064 Env:0.01241 Con:0.00256 | LR:0.000479 | 55.6s
+         rho1=0.197 rho2=0.380 eta=0.3387 gamma=0.693
+[Epoch   45/300] Train: 0.001877 (2.76dB) | Val: 0.001895 (3.09dB, init:0.51) NMSE:0.543130 | RF:0.00063 Env:0.01233 Con:0.00280 | LR:0.000473 | 55.7s
+         rho1=0.193 rho2=0.375 eta=0.3399 gamma=0.693
+[Epoch   50/300] Train: 0.001884 (2.76dB) | Val: 0.001902 (3.09dB, init:0.51) NMSE:0.541650 | RF:0.00064 Env:0.01236 Con:0.00279 | LR:0.000467 | 55.8s
+         rho1=0.192 rho2=0.373 eta=0.3397 gamma=0.693
+[Epoch   55/300] Train: 0.001896 (2.73dB) | Val: 0.001911 (3.08dB, init:0.51) NMSE:0.542207 | RF:0.00065 Env:0.01234 Con:0.00282 | LR:0.000460 | 55.8s
+         rho1=0.192 rho2=0.371 eta=0.3379 gamma=0.693
+[Epoch   60/300] Train: 0.001900 (2.73dB) | Val: 0.001916 (3.07dB, init:0.51) NMSE:0.543951 | RF:0.00065 Env:0.01239 Con:0.00303 | LR:0.000453 | 55.7s
+         rho1=0.190 rho2=0.371 eta=0.3351 gamma=0.693
+[Epoch   65/300] Train: 0.001914 (2.70dB) | Val: 0.001940 (3.01dB, init:0.51) NMSE:0.548147 | RF:0.00066 Env:0.01252 Con:0.00321 | LR:0.000445 | 55.7s
+         rho1=0.189 rho2=0.371 eta=0.3320 gamma=0.693
+[Epoch   70/300] Train: 0.001960 (2.62dB) | Val: 0.001960 (2.97dB, init:0.51) NMSE:0.552214 | RF:0.00067 Env:0.01263 Con:0.00320 | LR:0.000436 | 55.7s
+         rho1=0.191 rho2=0.370 eta=0.3256 gamma=0.693
+[Epoch   75/300] Train: 0.001946 (2.67dB) | Val: 0.001963 (2.98dB, init:0.51) NMSE:0.550262 | RF:0.00066 Env:0.01265 Con:0.00355 | LR:0.000428 | 55.6s
+         rho1=0.191 rho2=0.365 eta=0.3166 gamma=0.693
+[Epoch   80/300] Train: 0.001961 (2.65dB) | Val: 0.001969 (2.98dB, init:0.51) NMSE:0.550366 | RF:0.00066 Env:0.01269 Con:0.00368 | LR:0.000418 | 55.7s
+         rho1=0.190 rho2=0.366 eta=0.3101 gamma=0.693
+[Epoch   85/300] Train: 0.001926 (2.68dB) | Val: 0.001945 (3.01dB, init:0.51) NMSE:0.550436 | RF:0.00065 Env:0.01259 Con:0.00381 | LR:0.000408 | 55.4s
+         rho1=0.185 rho2=0.366 eta=0.3063 gamma=0.693

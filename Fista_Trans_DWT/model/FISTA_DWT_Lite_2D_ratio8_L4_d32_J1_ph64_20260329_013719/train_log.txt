@@ -1,0 +1,7 @@
+fista_dwt_lite_2d 2D Training | FISTA_DWT_Lite_2D_ratio8_L4_d32_J1_ph64_20260329_013719
+  layers=4, params=5,073,280
+  d_model=32, num_conv_blocks=2, conv_ks=5, dwt_levels=1
+  hasa: type=unet, hidden=16, num_layers=2, kernel=5, base_ch=16
+  patch_h=64, patch_stride=32
+  datasets=1, train=7830, val=870
+

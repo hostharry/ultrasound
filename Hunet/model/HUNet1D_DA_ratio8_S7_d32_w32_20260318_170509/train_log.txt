@@ -1,0 +1,10 @@
+HUNet-1D-DepthAdaptive Training | HUNet1D_DA_ratio8_S7_d32_w32_20260318_170509
+  stages=7, depth=4, params=2,545,515
+  embed_dim=32, nhead=4, window_size=32, mlp_ratio=2.0, swin_depth=2
+  adaptive_thr=True, thr_hidden_ratio=0.5, thr_scale=[0.7, 1.6], thr_init_depth_slope=-0.2
+  gamma_init=0.05, gamma_decay=0.9, gamma_floor=0.0005
+  loss_mode=nmse, depth_weight=linear, depth_weight_alpha=2.0
+  samples=9600, train=8576, val=1024
+
+[Epoch    1/500] Train: 0.430899 (4.02dB) | Val: 0.311638 (5.03dB, init:0.53) NMSE:0.348220 | RF:0.30988 Env:0.01759 Con:0.00000 | LR:0.000998 | 141.8s
+         rho1=1.056 rho2=1.056 eta=0.0505 gamma=0.000

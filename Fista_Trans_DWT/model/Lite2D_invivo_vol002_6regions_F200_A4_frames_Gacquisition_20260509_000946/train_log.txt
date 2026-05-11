@@ -1,0 +1,14 @@
+fista_dwt_lite_2d 2D Training | Lite2D_invivo_vol002_6regions_F200_A4_frames_Gacquisition_20260509_000946
+  [0] N=2133, 帧=4400, patch=4400, train=3740, val=660, K=133
+  datasets=1, train=3740, val=660
+  layers=4, params=4,184,704
+  d_model=32, num_conv_blocks=2, conv_ks=5, dwt_levels=1
+  hasa: type=conv, hidden=16, num_layers=2, kernel=5, base_ch=16
+  patch_h=999, patch_stride=16
+  tgc_alpha=2.0
+[Epoch    1/300] Train: 1.868247 (0.01dB) | Val: 1.792334 (0.06dB, init:0.70) NMSE:0.985911 | RF:1.58572 Env:0.01288 KLD:0.84690 DAS:1.20636 Con:0.00000 | LR:0.000500 | 655.1s
+         rho1=0.993 rho2=0.993 eta=0.7049 alpha=0.533
+[Epoch    5/300] Train: 3.231002 (-0.00dB) | Val: 3.270627 (0.00dB, init:0.70) NMSE:1.000000 | RF:1.56542 Env:0.01339 KLD:9.12378 DAS:7.91489 Con:0.00000 | LR:0.000500 | 644.8s
+         rho1=1.040 rho2=1.040 eta=0.6991 alpha=1.000
+[Epoch   10/300] Train: 10.753199 (-1.05dB) | Val: 3.259671 (-0.00dB, init:0.70) NMSE:1.000001 | RF:1.56564 Env:0.01339 KLD:9.12378 DAS:7.80318 Con:0.00000 | LR:0.000499 | 644.9s
+         rho1=1.036 rho2=1.036 eta=0.6992 alpha=1.000

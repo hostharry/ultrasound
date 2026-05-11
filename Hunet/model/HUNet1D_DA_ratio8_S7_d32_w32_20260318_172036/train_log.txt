@@ -1,0 +1,53 @@
+HUNet-1D-DepthAdaptive Training | HUNet1D_DA_ratio8_S7_d32_w32_20260318_172036
+  stages=7, depth=4, params=2,545,515
+  embed_dim=32, nhead=4, window_size=32, mlp_ratio=2.0, swin_depth=2
+  adaptive_thr=True, thr_hidden_ratio=0.5, thr_scale=[0.7, 1.6], thr_init_depth_slope=-0.2
+  gamma_init=0.05, gamma_decay=0.9, gamma_floor=0.0005
+  loss_mode=nmse, depth_weight=linear, depth_weight_alpha=2.0
+  samples=9600, train=8576, val=1024
+
+[Epoch    1/200] Train: 0.467641 (3.72dB) | Val: 0.328865 (4.77dB, init:0.53) NMSE:0.362742 | RF:0.32709 Env:0.01775 Con:0.00000 | LR:0.000998 | 144.9s
+         rho1=1.143 rho2=1.143 eta=0.0505 gamma=0.000
+[Epoch   10/200] Train: 0.138294 (8.85dB) | Val: 0.149151 (8.42dB, init:0.53) NMSE:0.174016 | RF:0.14804 Env:0.01106 Con:0.00000 | LR:0.000855 | 141.4s
+         rho1=1.544 rho2=1.544 eta=0.6482 gamma=0.000
+[Epoch   20/200] Train: 0.095594 (10.55dB) | Val: 0.110871 (9.82dB, init:0.53) NMSE:0.130543 | RF:0.10993 Env:0.00940 Con:0.00000 | LR:0.000505 | 143.0s
+         rho1=1.668 rho2=1.668 eta=0.7837 gamma=0.000
+[Epoch   30/200] Train: 0.069903 (12.00dB) | Val: 0.087936 (10.88dB, init:0.53) NMSE:0.103509 | RF:0.08710 Env:0.00836 Con:0.00000 | LR:0.000155 | 147.3s
+         rho1=1.720 rho2=1.720 eta=0.7869 gamma=0.000
+[Epoch   40/200] Train: 0.059932 (12.71dB) | Val: 0.078662 (11.39dB, init:0.53) NMSE:0.092625 | RF:0.07788 Env:0.00778 Con:0.00000 | LR:0.001000 | 149.1s
+         rho1=1.728 rho2=1.728 eta=0.7871 gamma=0.000
+[Epoch   50/200] Train: 0.089361 (10.88dB) | Val: 0.104785 (10.09dB, init:0.53) NMSE:0.121380 | RF:0.10391 Env:0.00875 Con:0.00000 | LR:0.000962 | 143.7s
+         rho1=1.873 rho2=1.873 eta=0.8167 gamma=0.000
+[Epoch   60/200] Train: 0.074089 (11.75dB) | Val: 0.094091 (10.60dB, init:0.53) NMSE:0.108682 | RF:0.09327 Env:0.00824 Con:0.00000 | LR:0.000855 | 142.6s
+         rho1=1.971 rho2=1.971 eta=0.8091 gamma=0.000
+[Epoch   70/200] Train: 0.062029 (12.57dB) | Val: 0.077681 (11.51dB, init:0.53) NMSE:0.089174 | RF:0.07691 Env:0.00767 Con:0.00000 | LR:0.000694 | 146.4s
+         rho1=2.046 rho2=2.046 eta=0.8020 gamma=0.000
+[Epoch   80/200] Train: 0.052563 (13.32dB) | Val: 0.067971 (12.06dB, init:0.53) NMSE:0.077656 | RF:0.06730 Env:0.00676 Con:0.00000 | LR:0.000505 | 148.3s
+         rho1=2.096 rho2=2.096 eta=0.7997 gamma=0.000
+[Epoch   90/200] Train: 0.043077 (14.21dB) | Val: 0.060661 (12.60dB, init:0.53) NMSE:0.069135 | RF:0.06001 Env:0.00651 Con:0.00000 | LR:0.000316 | 144.9s
+         rho1=2.111 rho2=2.111 eta=0.7952 gamma=0.000
+[Epoch  100/200] Train: 0.035745 (15.07dB) | Val: 0.050417 (13.42dB, init:0.53) NMSE:0.057613 | RF:0.04983 Env:0.00585 Con:0.00000 | LR:0.000155 | 148.0s
+         rho1=2.110 rho2=2.110 eta=0.7929 gamma=0.000
+[Epoch  110/200] Train: 0.031022 (15.72dB) | Val: 0.045557 (13.88dB, init:0.53) NMSE:0.052232 | RF:0.04499 Env:0.00566 Con:0.00000 | LR:0.000048 | 145.2s
+         rho1=2.105 rho2=2.105 eta=0.7928 gamma=0.000
+[Epoch  120/200] Train: 0.029406 (15.97dB) | Val: 0.043937 (14.04dB, init:0.53) NMSE:0.050519 | RF:0.04338 Env:0.00560 Con:0.00000 | LR:0.001000 | 142.7s
+         rho1=2.102 rho2=2.102 eta=0.7928 gamma=0.000
+[Epoch  130/200] Train: 0.062509 (12.53dB) | Val: 0.079420 (11.39dB, init:0.53) NMSE:0.091067 | RF:0.07867 Env:0.00752 Con:0.00000 | LR:0.000990 | 144.1s
+         rho1=2.219 rho2=2.219 eta=0.8144 gamma=0.000
+[Epoch  140/200] Train: 0.058678 (12.84dB) | Val: 0.068423 (12.05dB, init:0.53) NMSE:0.077608 | RF:0.06774 Env:0.00686 Con:0.00000 | LR:0.000962 | 141.4s
+         rho1=2.292 rho2=2.292 eta=0.8179 gamma=0.000
+[Epoch  150/200] Train: 0.053397 (13.25dB) | Val: 0.067716 (12.15dB, init:0.53) NMSE:0.077289 | RF:0.06702 Env:0.00693 Con:0.00000 | LR:0.000917 | 144.8s
+         rho1=2.350 rho2=2.350 eta=0.8101 gamma=0.000
+[Epoch  160/200] Train: 0.049187 (13.59dB) | Val: 0.068384 (12.06dB, init:0.53) NMSE:0.079673 | RF:0.06772 Env:0.00667 Con:0.00000 | LR:0.000855 | 145.2s
+         rho1=2.398 rho2=2.398 eta=0.8128 gamma=0.000
+[Epoch  170/200] Train: 0.044423 (14.07dB) | Val: 0.069406 (12.01dB, init:0.53) NMSE:0.079263 | RF:0.06875 Env:0.00655 Con:0.00000 | LR:0.000780 | 141.5s
+         rho1=2.437 rho2=2.437 eta=0.8088 gamma=0.000
+[Epoch  180/200] Train: 0.038993 (14.65dB) | Val: 0.055796 (12.95dB, init:0.53) NMSE:0.063681 | RF:0.05519 Env:0.00608 Con:0.00000 | LR:0.000694 | 142.5s
+         rho1=2.453 rho2=2.453 eta=0.8056 gamma=0.000
+[Epoch  190/200] Train: 0.035008 (15.13dB) | Val: 0.048745 (13.57dB, init:0.53) NMSE:0.054938 | RF:0.04818 Env:0.00560 Con:0.00000 | LR:0.000602 | 145.2s
+         rho1=2.466 rho2=2.466 eta=0.8042 gamma=0.000
+[Epoch  200/200] Train: 0.032813 (15.42dB) | Val: 0.046644 (13.74dB, init:0.53) NMSE:0.054010 | RF:0.04610 Env:0.00547 Con:0.00000 | LR:0.000505 | 144.2s
+         rho1=2.470 rho2=2.470 eta=0.8021 gamma=0.000
+
+最佳验证 SNR: 14.04 dB @ Epoch 120
+模型保存至: model/HUNet1D_DA_ratio8_S7_d32_w32_20260318_172036

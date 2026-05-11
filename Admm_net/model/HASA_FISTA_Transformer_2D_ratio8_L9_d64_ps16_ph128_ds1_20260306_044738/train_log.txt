@@ -1,0 +1,39 @@
+HASA-FISTA-Transformer-Net 2D Training | HASA_FISTA_Transformer_2D_ratio8_L9_d64_ps16_ph128_ds1_20260306_044738
+  layers=9, patch_h=128, params=4,211,163
+  datasets=1, train=22, val=3
+  d_model=64, nhead=4, num_transformer_layers=2, patch_size=16
+
+[Epoch    1/200] Train: 0.011490 (-1.70dB) | Val: 0.008757 (-0.72dB, init:0.54) NMSE:1.180373 | RF:0.00444 Env:0.04320 Con:0.00000 | LR:0.000500 | 2.1s
+         rho1=0.972 rho2=0.972 eta=0.6995 gamma=0.000
+[Epoch    5/200] Train: 0.006749 (-0.05dB) | Val: 0.006720 (-0.04dB, init:0.54) NMSE:1.009378 | RF:0.00380 Env:0.02921 Con:0.00000 | LR:0.000499 | 1.6s
+         rho1=0.967 rho2=0.967 eta=0.7044 gamma=0.000
+[Epoch   10/200] Train: 0.006593 (-0.01dB) | Val: 0.006597 (-0.02dB, init:0.54) NMSE:1.003677 | RF:0.00378 Env:0.02818 Con:0.00000 | LR:0.000497 | 1.7s
+         rho1=0.962 rho2=0.962 eta=0.7089 gamma=0.000
+[Epoch   15/200] Train: 0.006545 (-0.01dB) | Val: 0.006568 (-0.01dB, init:0.54) NMSE:1.002860 | RF:0.00378 Env:0.02792 Con:0.00000 | LR:0.000493 | 1.8s
+         rho1=0.957 rho2=0.957 eta=0.7130 gamma=0.000
+[Epoch   20/200] Train: 0.006547 (-0.01dB) | Val: 0.006549 (-0.01dB, init:0.54) NMSE:1.002717 | RF:0.00377 Env:0.02774 Con:0.00000 | LR:0.000488 | 1.5s
+         rho1=0.953 rho2=0.953 eta=0.7169 gamma=0.000
+[Epoch   25/200] Train: 0.006495 (-0.01dB) | Val: 0.006526 (-0.01dB, init:0.54) NMSE:1.003094 | RF:0.00378 Env:0.02750 Con:0.00000 | LR:0.000481 | 1.5s
+         rho1=0.948 rho2=0.948 eta=0.7200 gamma=0.000
+[Epoch   30/200] Train: 0.006489 (-0.01dB) | Val: 0.006504 (-0.02dB, init:0.54) NMSE:1.003507 | RF:0.00378 Env:0.02727 Con:0.00000 | LR:0.000473 | 1.6s
+         rho1=0.944 rho2=0.944 eta=0.7222 gamma=0.000
+[Epoch   35/200] Train: 0.006454 (-0.01dB) | Val: 0.006488 (-0.02dB, init:0.54) NMSE:1.004386 | RF:0.00378 Env:0.02707 Con:0.00000 | LR:0.000464 | 1.6s
+         rho1=0.938 rho2=0.938 eta=0.7240 gamma=0.000
+[Epoch   40/200] Train: 0.006431 (-0.02dB) | Val: 0.006475 (-0.02dB, init:0.54) NMSE:1.004364 | RF:0.00378 Env:0.02694 Con:0.00000 | LR:0.000453 | 1.5s
+         rho1=0.933 rho2=0.933 eta=0.7244 gamma=0.000
+[Epoch   45/200] Train: 0.006427 (-0.02dB) | Val: 0.006460 (-0.02dB, init:0.54) NMSE:1.005429 | RF:0.00378 Env:0.02675 Con:0.00000 | LR:0.000441 | 1.6s
+         rho1=0.928 rho2=0.928 eta=0.7242 gamma=0.000
+[Epoch   50/200] Train: 0.006416 (-0.02dB) | Val: 0.006448 (-0.02dB, init:0.54) NMSE:1.004824 | RF:0.00378 Env:0.02665 Con:0.00000 | LR:0.000428 | 1.6s
+         rho1=0.924 rho2=0.924 eta=0.7238 gamma=0.000
+[Epoch   55/200] Train: 0.006434 (-0.02dB) | Val: 0.006440 (-0.02dB, init:0.54) NMSE:1.005009 | RF:0.00378 Env:0.02657 Con:0.00000 | LR:0.000413 | 2.2s
+         rho1=0.919 rho2=0.919 eta=0.7229 gamma=0.000
+[Epoch   60/200] Train: 0.006402 (-0.02dB) | Val: 0.006436 (-0.03dB, init:0.54) NMSE:1.006517 | RF:0.00379 Env:0.02647 Con:0.00000 | LR:0.000398 | 1.6s
+         rho1=0.915 rho2=0.915 eta=0.7220 gamma=0.000
+[Epoch   65/200] Train: 0.006401 (-0.02dB) | Val: 0.006422 (-0.02dB, init:0.54) NMSE:1.005248 | RF:0.00378 Env:0.02638 Con:0.00000 | LR:0.000382 | 1.6s
+         rho1=0.911 rho2=0.911 eta=0.7210 gamma=0.000
+[Epoch   70/200] Train: 0.006397 (-0.02dB) | Val: 0.006415 (-0.02dB, init:0.54) NMSE:1.005370 | RF:0.00378 Env:0.02631 Con:0.00000 | LR:0.000365 | 1.5s
+         rho1=0.908 rho2=0.908 eta=0.7203 gamma=0.000
+[Epoch   75/200] Train: 0.006371 (-0.02dB) | Val: 0.006409 (-0.02dB, init:0.54) NMSE:1.005615 | RF:0.00379 Env:0.02623 Con:0.00000 | LR:0.000347 | 1.8s
+         rho1=0.904 rho2=0.904 eta=0.7201 gamma=0.000
+[Epoch   80/200] Train: 0.006373 (-0.02dB) | Val: 0.006402 (-0.03dB, init:0.54) NMSE:1.005996 | RF:0.00379 Env:0.02616 Con:0.00000 | LR:0.000329 | 1.9s
+         rho1=0.902 rho2=0.902 eta=0.7198 gamma=0.000

@@ -1,0 +1,13 @@
+fista_transformer_dwt Training | FISTA_DWT_ratio8_L4_d16_J3_20260317_231957
+  layers=4, params=51,376
+  d_model=16, nhead=4, num_transformer_layers=1, dwt_levels=3
+  samples=2000, train=1774, val=226
+
+[Epoch    1/200] Train: 0.006192 (0.42dB) | Val: 0.005524 (1.41dB, init:0.53) NMSE:0.727760 | RF:0.00295 Env:0.02577 Con:0.00000 | LR:0.001000 | 28.4s
+         rho1=0.935 rho2=0.935 eta=0.6950 gamma=0.000
+[Epoch   10/200] Train: 0.004037 (2.83dB) | Val: 0.004085 (2.97dB, init:0.53) NMSE:0.527546 | RF:0.00197 Env:0.02119 Con:0.00000 | LR:0.000994 | 27.2s
+         rho1=0.903 rho2=0.903 eta=0.7176 gamma=0.000
+[Epoch   20/200] Train: 0.003821 (3.13dB) | Val: 0.003914 (3.19dB, init:0.53) NMSE:0.504697 | RF:0.00185 Env:0.02063 Con:0.00000 | LR:0.000976 | 27.4s
+         rho1=0.940 rho2=0.940 eta=0.7043 gamma=0.000
+[Epoch   30/200] Train: 0.003745 (3.24dB) | Val: 0.003855 (3.29dB, init:0.53) NMSE:0.493862 | RF:0.00181 Env:0.02047 Con:0.00000 | LR:0.000946 | 27.0s
+         rho1=0.994 rho2=0.994 eta=0.6964 gamma=0.000

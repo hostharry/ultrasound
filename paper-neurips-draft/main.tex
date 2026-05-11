@@ -1,0 +1,178 @@
+\documentclass{article}
+
+\usepackage[nonatbib]{neurips}
+\usepackage[numbers]{natbib}
+
+\makeatletter
+\renewcommand{\@noticestring}{
+  \centering
+}
+\makeatother
+
+\input{extra_pkgs}
+
+\usepackage{physics}
+\usepackage{mathtools}
+\DeclarePairedDelimiter\p{(}{)}
+\DeclarePairedDelimiter\n{|}{|}
+\DeclarePairedDelimiter\B{[}{]}
+
+\title{HASA-FISTA-DWT-Lite: Lightweight Adaptive Unrolled Reconstruction for Ultrasound Compressive Sensing}
+
+\author{
+  Anonymous Authors \\
+  Paper under double-blind review
+}
+
+\begin{document}
+
+\maketitle
+
+\begin{abstract}
+Sub-Nyquist ultrasound acquisition is attractive because it can reduce sampling, memory traffic, and reconstruction latency, but it also makes RF reconstruction substantially more ill-posed. Existing unrolled reconstruction networks in this repo span classical sparse recovery, learned iterative shrinkage, and transformer-based proximal modules. A recurring trade-off is that globally adaptive proximal operators are expressive but expensive, while lightweight local operators are efficient but less adaptive. We present a NeurIPS-style draft centered on \textbf{HASA-FISTA-DWT-Lite}, a lightweight unrolled reconstruction network that preserves global adaptivity through a transformer-generated depth-aware weighting module while replacing full-sequence proximal transformers with convolutional TV and wavelet subband proximal blocks. The resulting model combines (i) a masked RFFT data-consistency step, (ii) globally conditioned adaptive regularization maps, (iii) multi-scale Haar DWT processing with subband-specific shrinkage, and (iv) FISTA-style momentum with multi-stage feature fusion. On the held-out split recorded in the repository for PICMUS simulated resolution data at compression ratio 8, the best run reaches 18.86 dB SNR, 0.0172 NMSE, 44.15 dB PSNR, and 0.9931 SSIM, outperforming the strongest available in-repo baseline by 4.82 dB SNR and 0.0333 NMSE. This draft is intentionally conservative: all claims are derived from existing repository artifacts, and literature citations are marked explicitly where external verification is still needed.
+\end{abstract}
+
+\section{Introduction}
+Sub-Nyquist ultrasound RF reconstruction is an inverse problem in which a forward operator acquires only a subset of the available frequency-domain coefficients, and the reconstruction algorithm must recover spatially and depth-varying structure from these partial observations. In this regime, purely classical sparse solvers can be robust but underfit the statistics of ultrasound RF signals, whereas fully learned feed-forward baselines may not preserve the structure of the acquisition model. Unrolled optimization offers a useful middle ground by embedding the measurement operator directly into a learnable iterative architecture.
+
+The repository at the center of this draft explores several variants of that idea, including LISTA, NESTA, ISTA-Net+, HUNet, HASA-FISTA, and DWT-based unfolded models. The strongest and most internally coherent line is \textbf{FISTA-DWT-Lite}, which addresses a concrete modeling tension: global proximal transformers can adapt thresholds and branch weights across depth, but their full-sequence attention cost scales poorly with signal length; conversely, purely local convolutional proximals are efficient but may miss long-range context. FISTA-DWT-Lite resolves this tension by retaining a global transformer only where it is most useful, namely in generating adaptive regularization maps, while moving the expensive proximal computation into lightweight convolutional TV and DWT subband operators.
+
+This yields the following paper narrative.
+\begin{itemize}[leftmargin=*, noitemsep]
+  \item We formulate ultrasound compressive sensing reconstruction as a masked-RFFT inverse problem solved by a FISTA-style unfolded network with explicit data consistency.
+  \item We introduce a lightweight proximal design that combines a local convolutional TV branch with a multi-scale DWT branch, while a global HASA module predicts position-wise regularization strengths and branch fusion weights.
+  \item Using the existing repository runs on PICMUS simulated resolution data, we show that the proposed design substantially outperforms the strongest in-repo baselines on the recorded held-out split.
+\end{itemize}
+
+The current draft is a first submission-oriented manuscript, not a camera-ready paper. In particular, the literature pass, multi-seed confirmation, and figure polishing remain incomplete and are tracked explicitly as TODO items rather than being silently assumed.
+
+\section{Problem Setup}
+Let $x \in \mathbb{R}^{N}$ denote a 1D ultrasound RF signal and let $y$ be a sub-sampled frequency-domain observation produced by a masked real FFT operator $A$. In the code, this operator is implemented as
+\[
+A(x) = \mathrm{rFFT}(x)\vert_{\mu},
+\]
+where $\mu$ indexes the retained frequencies, and the adjoint inserts zeros in the missing spectrum before applying the inverse real FFT. The reconstruction task is to recover $x$ from $y$ at a fixed compression ratio, with the main experiments in this repo using ratio 8.
+
+The repository data pipeline loads preprocessed NPZ files containing zero-filled signals, ground-truth signals, masks, and group identifiers for group-wise splitting. For the strongest 1D run used in this draft, the configuration is:
+\begin{itemize}[leftmargin=*, noitemsep]
+  \item dataset: \texttt{../data/picmus\_simu\_reso.npz},
+  \item compression ratio: 8,
+  \item split: group-based 90/10 split with seed 42,
+  \item samples: 9600 total, 8576 train, 1024 validation/evaluation.
+\end{itemize}
+
+\section{Method}
+\subsection{Overview}
+The network starts from an initialization $x_0 = A^\dagger y$, normalizes the amplitude internally, and then applies $K$ unfolded reconstruction blocks followed by a multi-stage fusion module. Each block performs one data-consistency step, predicts adaptive regularization maps, applies a dual-branch proximal update, and then adds FISTA-style momentum.
+
+\subsection{Adaptive FISTA-DWT-Lite Block}
+At unfolded layer $k$, the current extrapolated iterate $v_k$ is updated by
+\[
+z_k = v_k - \rho_k A^\top (A v_k - y),
+\]
+where $\rho_k$ is a learned positive step size.
+
+A global HASA module then reads $z_k$ and predicts three position-wise maps:
+\[
+(\lambda^{(k)}_{\mathrm{tv}}, \lambda^{(k)}_{\mathrm{wav}}, \alpha^{(k)}) = H_k(z_k),
+\]
+where $\lambda^{(k)}_{\mathrm{tv}}$ and $\lambda^{(k)}_{\mathrm{wav}}$ modulate the TV and wavelet thresholds, and $\alpha^{(k)} \in (0,1)$ fuses the two proximal branches.
+
+The TV branch applies a stack of residual 1D convolutions followed by soft-thresholding in feature space. The wavelet branch first applies a multi-level Haar DWT, processes each subband with its own residual convolutional encoder-decoder, gates the approximation coefficients, and applies soft-thresholding to the detail coefficients using thresholds that are downsampled to each subband resolution. The two branches are fused as
+\[
+x^{\mathrm{tv}}_{k+1} = P^{(k)}_{\mathrm{tv}}(z_k), \qquad
+x^{\mathrm{wav}}_{k+1} = P^{(k)}_{\mathrm{wav}}(z_k),
+\]
+\[
+x_{k+1} = \alpha^{(k)} \odot x^{\mathrm{tv}}_{k+1}
++ \left(1 - \alpha^{(k)}\right) \odot x^{\mathrm{wav}}_{k+1}.
+\]
+Finally, FISTA-style momentum produces
+\[
+v_{k+1} = x_{k+1} + \beta_k (x_{k+1} - x_k),
+\]
+with learned $\beta_k$.
+
+\subsection{Why This Design Matters}
+The key architectural choice is to keep global attention only in the weighting pathway and make the proximal operators local and multiscale. According to the implementation notes in the repo, this replaces the dominant proximal complexity of full-sequence transformer blocks with convolutional operators whose cost scales approximately linearly in sequence length for fixed kernel size. The design therefore aims to retain adaptive, depth-aware behavior without paying the full quadratic cost of attention inside every proximal branch.
+
+\subsection{Training Objective}
+The recorded best run uses NMSE as the RF-domain loss, adds an envelope-domain term with weight $\gamma_{\mathrm{env}}=0.1$, and applies linear depth weighting with strength 2.0. Training uses Adam with learning rate $10^{-3}$, weight decay $10^{-5}$, batch size 16, gradient clipping at 1.0, and cosine-style restart scheduling as recorded in the experiment logs.
+
+\section{Experiments}
+\subsection{Experimental Protocol}
+All quantitative results in this draft are taken directly from saved repository artifacts rather than from a fresh rerun. We therefore treat them as \emph{recorded held-out split results}. The main comparison focuses on methods for which the repo already contains evaluation reports under the same ratio-8 1D setting.
+
+\subsection{Main Quantitative Results}
+Table~\ref{tab:main_results} summarizes the strongest available runs found in the repository. FISTA-DWT-Lite is the clear top performer across all reported signal fidelity metrics.
+
+\begin{table}[t]
+  \centering
+  \small
+  \caption{Recorded ratio-8 1D reconstruction results on the held-out split from repository evaluation reports. Best results are bold.}
+  \label{tab:main_results}
+  \resizebox{\linewidth}{!}{
+  \begin{tabular}{lccccc}
+    \toprule
+    Method & SNR $\uparrow$ & NMSE $\downarrow$ & PSNR $\uparrow$ & SSIM $\uparrow$ & Env.\ Corr.\ $\uparrow$ \\
+    \midrule
+    NESTA & 2.12 $\pm$ 1.55 & 0.6506 $\pm$ 0.2008 & 26.83 $\pm$ 3.08 & 0.5945 $\pm$ 0.1559 & 0.5867 $\pm$ 0.2000 \\
+    LISTA & 2.34 $\pm$ 1.27 & 0.6080 $\pm$ 0.1677 & 27.05 $\pm$ 2.45 & 0.6341 $\pm$ 0.1288 & 0.7138 $\pm$ 0.1108 \\
+    ISTA-Net+ & 4.05 $\pm$ 1.76 & 0.4261 $\pm$ 0.1687 & 28.76 $\pm$ 2.60 & 0.7720 $\pm$ 0.0984 & 0.7727 $\pm$ 0.1220 \\
+    HASA-FISTA-Transformer & 7.78 $\pm$ 3.44 & 0.2091 $\pm$ 0.1157 & 26.65 $\pm$ 5.21 & 0.7246 $\pm$ 0.2453 & 0.8976 $\pm$ 0.0761 \\
+    HUNet-1D-DA & 14.04 $\pm$ 3.01 & 0.0505 $\pm$ 0.0409 & 39.32 $\pm$ 2.39 & 0.9791 $\pm$ 0.0143 & 0.9870 $\pm$ 0.0124 \\
+    \textbf{FISTA-DWT-Lite} & \textbf{18.86 $\pm$ 3.20} & \textbf{0.0172 $\pm$ 0.0148} & \textbf{44.15 $\pm$ 1.82} & \textbf{0.9931 $\pm$ 0.0049} & \textbf{0.9951 $\pm$ 0.0046} \\
+    \bottomrule
+  \end{tabular}}
+\end{table}
+
+Two observations are especially important for the paper narrative. First, the gap between FISTA-DWT-Lite and the strongest available baseline, HUNet-1D-DA, is large and consistent across all metrics: +4.82 dB SNR, -0.0333 NMSE, +4.83 dB PSNR, and +0.0140 SSIM. Second, the improvement is not merely over classical sparse recovery baselines; it also holds over learned unrolled alternatives such as ISTA-Net+ and transformer-based unfolded variants present in the repo.
+
+\subsection{Training Behavior}
+The strongest run was trained for 1200 epochs in total through staged resumption, with the saved log reporting a best validation SNR of 18.24 dB around epoch 599 and final evaluation metrics of 18.86 dB SNR and 0.0172 NMSE over 1024 held-out samples. The log also shows a large improvement over the zero-filled initialization produced by the adjoint operator.
+
+\subsection{What Is Still Missing}
+This draft intentionally avoids over-claiming. The current repository evidence does \emph{not} yet establish:
+\begin{itemize}[leftmargin=*, noitemsep]
+  \item multi-seed robustness,
+  \item cross-dataset generalization beyond the recorded PICMUS split,
+  \item stable 2D performance competitive with the strongest 1D results,
+  \item clean ablations isolating the contributions of HASA, DWT subband shrinkage, DFFM fusion, and depth weighting.
+\end{itemize}
+These gaps should be addressed before submission if time permits.
+
+\section{Related Work}
+This section is written conservatively and needs a verified citation pass before submission.
+
+\paragraph{Compressed sensing and sparse ultrasound reconstruction.}
+Classical iterative methods such as ISTA, FISTA, LISTA-inspired learned variants, and NESTA motivate the reconstruction setting explored in this repo. TODO: add verified citations for ISTA/FISTA/LISTA/NESTA and prior ultrasound compressed sensing reconstruction work. [CITATION NEEDED]
+
+\paragraph{Unrolled inverse problems.}
+The overall design belongs to the family of deep unfolding methods that embed data-consistency updates and learned proximal operators into a finite network. TODO: add verified citations for unrolled optimization in inverse problems and imaging. [CITATION NEEDED]
+
+\paragraph{Wavelets and multiscale priors.}
+The DWT branch reflects the long-standing utility of multiscale sparse representations for RF-like signals, but here it is integrated into a learned unfolded architecture with adaptive subband shrinkage. TODO: add verified citations for wavelet priors in ultrasound and learned multiscale inverse models. [CITATION NEEDED]
+
+\paragraph{Transformer-based adaptive regularization.}
+The HASA module uses global attention to generate position-wise adaptive weights rather than to perform the full proximal computation itself. TODO: add verified citations for transformer priors in inverse problems and adaptive regularization maps. [CITATION NEEDED]
+
+\section{Limitations}
+The current evidence base is narrower than what a polished NeurIPS submission should ideally provide.
+\begin{itemize}[leftmargin=*, noitemsep]
+  \item \textbf{Single confirmed data configuration.} The strongest claim currently comes from one dataset configuration, one compression ratio, and one recorded split.
+  \item \textbf{Unverified generalization to 2D.} The 2D runs visible in the repository are not yet competitive enough to support the same narrative.
+  \item \textbf{Limited statistical validation.} Evaluation reports provide mean and standard deviation over held-out samples, but not over multiple independent training seeds.
+  \item \textbf{Literature pass incomplete.} This manuscript intentionally avoids fabricated references; all missing citations still need explicit verification.
+\end{itemize}
+
+\section{Broader Impact}
+Compressed ultrasound acquisition could reduce acquisition bandwidth and storage costs, which may improve access and portability in clinical or low-resource settings. At the same time, any reconstruction method used in diagnostic workflows must be validated carefully for hallucinated or suppressed structures, especially when adaptive learned priors are involved. This work should therefore be positioned as a reconstruction research study rather than a clinically validated system.
+
+\section{Conclusion}
+This draft argues that the most promising contribution in the repository is a lightweight adaptive unfolded model for ultrasound compressive sensing reconstruction. By combining explicit data consistency, global adaptive weighting, multiscale DWT proximal processing, and FISTA-style acceleration, FISTA-DWT-Lite achieves the strongest recorded ratio-8 1D performance in the repo while preserving a clear inverse-problem interpretation. The next milestone is to turn this draft into a submission-ready paper by adding verified related work, publication-quality figures, and a focused ablation suite.
+
+% TODO: add verified bibliography only after programmatic citation checks.
+% \bibliographystyle{plainnat}
+% \bibliography{bibliography}
+
+\end{document}

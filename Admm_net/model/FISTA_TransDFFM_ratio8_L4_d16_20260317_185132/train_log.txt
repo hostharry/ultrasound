@@ -1,0 +1,5 @@
+FISTA-Transformer-DFFM 1D Training | FISTA_TransDFFM_ratio8_L4_d16_20260317_185132
+  layers=4, params=49,432
+  d_model=16, nhead=4, num_transformer_layers=1
+  samples=2000, train=1774, val=226
+

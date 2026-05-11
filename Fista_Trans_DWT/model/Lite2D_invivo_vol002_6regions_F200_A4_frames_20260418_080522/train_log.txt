@@ -1,0 +1,9 @@
+fista_dwt_lite_2d 2D Training | Lite2D_invivo_vol002_6regions_F200_A4_frames_20260418_080522
+  layers=4, params=4,184,704
+  amp=True
+  DAS image loss: gamma=0.1, mode=kld_mslae, datasets=1/1
+  d_model=32, num_conv_blocks=2, conv_ks=5, dwt_levels=1
+  hasa: type=conv, hidden=16, num_layers=2, kernel=5, base_ch=16
+  patch_h=999, patch_stride=16
+  datasets=1, train=3740, val=660
+

@@ -1,0 +1,56 @@
+# === Data files (large, regeneratable / publicly downloadable) ===
+*.npz
+*.hdf5
+*.h5
+*.uff
+*.mat
+.das_cache/
+**/.das_cache/
+
+# Public datasets (re-downloadable, don't bloat repo)
+PICMUS/database/
+data_epfl/
+**/Alpinion_*.uff
+
+# === External vendored project (its own git history) ===
+ISTA-Net-PyTorch/
+
+# === Old checkpoints (keep only best_model.pth, drop epoch dumps) ===
+**/checkpoint_epoch*.pth
+
+# === Python ===
+__pycache__/
+*.py[cod]
+*.so
+*.egg-info/
+.pytest_cache/
+.mypy_cache/
+.ruff_cache/
+
+# === Experiment tracking ===
+wandb/
+**/wandb/
+*.wandb
+
+# === Nested vendored repo (track its code but exclude its own .git) ===
+ISTA-Net-PyTorch/.git/
+
+# === IDE ===
+.vscode/
+.idea/
+*.swp
+.DS_Store
+Thumbs.db
+
+# === Backups / tmp ===
+*.bak
+.git.bak/
+*.tmp
+*.tar.gz
+*.zip
+
+# === Local secrets ===
+.env
+.env.*
+*.pem
+*.key

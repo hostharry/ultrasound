@@ -1,0 +1,182 @@
+/root/autodl-tmp/毕业设计/Ultrasound/Fista_Trans_DWT/../Utils/evaluate_common.py:1150: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  plt.tight_layout()
+/root/autodl-tmp/毕业设计/Ultrasound/Fista_Trans_DWT/../Utils/evaluate_common.py:752: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  plt.tight_layout(rect=[0, 0, 1, 0.97])
+Config: {'npz': "['../data_epfl/invivo_vol002_6regions_F200_A4_frames_Gacquisition.npz']", 'cs_ratio': 8, 'val_ratio': 0.15, 'split_mode': 'group', 'seed': 42, 'layers': 4, 'gamma_env': 0.1, 'loss_mode': 'slae', 'depth_weight': 'exp', 'depth_weight_alpha': 3.0, 'gamma_msle': 0.0, 'gamma_kld': 0.1, 'alpha_db': -60.0, 'kld_bins': 40, 'kld_eta': 0.5, 'kld_low_db': -60.0, 'kld_high_db': 0.0, 'gamma_grad': 0.0, 'gamma_stat': 0.0, 'stat_var_weight': 0.5, 'stat_win': 7, 'gamma_das': 0.1, 'das_loss_mode': 'kld_mslae', 'das_alpha_db': -60.0, 'das_beta_kld': 0.5, 'das_kld_bins': 40, 'das_kld_eta': 0.5, 'das_kld_low_db': -40.0, 'das_kld_high_db': 40.0, 'das_chunk_size': 10000, 'das_checkpoint': True, 'settings_dir': 'None', 'epochs': 300, 'batch_size': 8, 'val_batch_size': 'None', 'lr': 0.0005, 'weight_decay': 1e-05, 'warm_restarts': 0, 'grad_clip': 1.0, 'amp': False, 'compile': False, 'gpu': 0, 'save_dir': 'model', 'resume': 'None', 'log_interval': 5, 'save_interval': 50, 'd_model': 32, 'num_conv_blocks': 2, 'conv_ks': 5, 'dwt_levels': 1, 'prox_tau': 0.005, 'hasa_type': 'conv', 'hasa_base_ch': 16, 'hasa_hidden': 16, 'num_hasa_layers': 2, 'hasa_kernel': 5, 'hasa_context_ks': 3, 'hasa_context_dilation': 3, 'patch_h': 999, 'patch_stride': 16}
+Loaded checkpoint: model/Lite2D_invivo_vol002_6regions_F200_A4_frames_Gacquisition_20260510_005942/best_model.pth (epoch 42)
+Model: FISTA-DWT-Lite-2D, params=4,184,704
+  [DAS] 训练用 patch_h=999, 但 DAS 需要完整帧 → 强制 patch_h=None
+  Training curves saved
+
+加载数据: ../data_epfl/invivo_vol002_6regions_F200_A4_frames_Gacquisition.npz
+  Dataset [0]: N=2133, H_full=192, n_frames=4400, samples=4400, unit=frame
+  Frame 0: SNR=11.45 dB, PSNR=35.50 dB, SSIM=0.8689 (init=0.74), NMSE=0.0716
+  Frame 1099: SNR=5.49 dB, PSNR=35.55 dB, SSIM=0.8847 (init=0.69), NMSE=0.2824
+  Frame 2199: SNR=5.62 dB, PSNR=38.34 dB, SSIM=0.9072 (init=0.70), NMSE=0.2743
+  Frame 3299: SNR=7.97 dB, PSNR=36.52 dB, SSIM=0.9211 (init=0.70), NMSE=0.1596
+  Frame 4399: SNR=8.54 dB, PSNR=38.44 dB, SSIM=0.9463 (init=0.70), NMSE=0.1399
+  eval_frames_ds0.npz saved ((4400, 192, 2133))
+  [max_acq=15] 仅评估 15/200 acquisitions: [0, 14, 28, 42, 56, 71, 85, 99, 113, 127, 142, 156, 170, 184, 199]
+
+  === Acquisition 0 ===
+    Recon DAS ...
+    PSNR=16.51 dB  SSIM=0.2528  SNR=12.60 dB  CR_gt=-4.49 dB  CR_pred=-0.46 dB  CNR_gt=0.266  CNR_pred=0.069
+    Speckle SNR  gt=2.290  pred=1.843
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (15.7s)
+
+  === Acquisition 14 ===
+    Recon DAS ...
+    PSNR=17.48 dB  SSIM=0.2502  SNR=13.35 dB  CR_gt=-5.04 dB  CR_pred=1.63 dB  CNR_gt=0.568  CNR_pred=0.208
+    Speckle SNR  gt=2.291  pred=2.101
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (15.6s)
+
+  === Acquisition 28 ===
+    Recon DAS ...
+    PSNR=15.69 dB  SSIM=0.2478  SNR=11.57 dB  CR_gt=-11.50 dB  CR_pred=1.23 dB  CNR_gt=0.644  CNR_pred=0.212
+    Speckle SNR  gt=2.244  pred=1.867
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (15.5s)
+
+  === Acquisition 42 ===
+    Recon DAS ...
+    PSNR=16.53 dB  SSIM=0.2586  SNR=12.70 dB  CR_gt=-3.81 dB  CR_pred=-1.68 dB  CNR_gt=0.553  CNR_pred=0.241
+    Speckle SNR  gt=2.668  pred=2.424
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (15.7s)
+
+  === Acquisition 56 ===
+    Recon DAS ...
+    PSNR=15.83 dB  SSIM=0.2550  SNR=11.59 dB  CR_gt=-12.27 dB  CR_pred=-3.73 dB  CNR_gt=0.569  CNR_pred=0.414
+    Speckle SNR  gt=2.275  pred=1.876
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (15.8s)
+
+  === Acquisition 71 ===
+    Recon DAS ...
+    PSNR=17.66 dB  SSIM=0.2791  SNR=13.92 dB  CR_gt=-2.43 dB  CR_pred=-1.63 dB  CNR_gt=0.326  CNR_pred=0.267
+    Speckle SNR  gt=2.264  pred=2.055
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (15.8s)
+
+  === Acquisition 85 ===
+    Recon DAS ...
+    PSNR=17.42 dB  SSIM=0.3124  SNR=13.79 dB  CR_gt=-2.98 dB  CR_pred=0.28 dB  CNR_gt=0.420  CNR_pred=0.047
+    Speckle SNR  gt=2.111  pred=2.013
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (15.8s)
+
+  === Acquisition 99 ===
+    Recon DAS ...
+    PSNR=16.79 dB  SSIM=0.2396  SNR=13.47 dB  CR_gt=-11.23 dB  CR_pred=-11.36 dB  CNR_gt=0.576  CNR_pred=0.468
+    Speckle SNR  gt=2.311  pred=1.959
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (16.2s)
+
+  === Acquisition 113 ===
+    Recon DAS ...
+    PSNR=16.81 dB  SSIM=0.3096  SNR=13.24 dB  CR_gt=-2.44 dB  CR_pred=-1.11 dB  CNR_gt=0.304  CNR_pred=0.148
+    Speckle SNR  gt=2.210  pred=1.780
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (16.4s)
+
+  === Acquisition 127 ===
+    Recon DAS ...
+    PSNR=17.63 dB  SSIM=0.3803  SNR=14.20 dB  CR_gt=-3.03 dB  CR_pred=3.13 dB  CNR_gt=0.381  CNR_pred=0.579
+    Speckle SNR  gt=2.331  pred=1.580
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (49.3s)
+
+  === Acquisition 142 ===
+    Recon DAS ...
+    PSNR=17.61 dB  SSIM=0.3226  SNR=14.02 dB  CR_gt=-2.08 dB  CR_pred=1.88 dB  CNR_gt=0.314  CNR_pred=0.458
+    Speckle SNR  gt=2.489  pred=4.148
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (48.1s)
+
+  === Acquisition 156 ===
+    Recon DAS ...
+    PSNR=16.59 dB  SSIM=0.3365  SNR=12.83 dB  CR_gt=-1.10 dB  CR_pred=1.70 dB  CNR_gt=0.159  CNR_pred=0.245
+    Speckle SNR  gt=2.306  pred=1.640
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (48.1s)
+
+  === Acquisition 170 ===
+    Recon DAS ...
+    PSNR=16.81 dB  SSIM=0.2722  SNR=13.29 dB  CR_gt=-2.56 dB  CR_pred=-2.35 dB  CNR_gt=0.144  CNR_pred=0.280
+    Speckle SNR  gt=2.139  pred=1.911
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (47.9s)
+
+  === Acquisition 184 ===
+    Recon DAS ...
+    PSNR=16.76 dB  SSIM=0.3446  SNR=13.98 dB  CR_gt=-6.41 dB  CR_pred=-5.54 dB  CNR_gt=0.323  CNR_pred=0.427
+    Speckle SNR  gt=1.767  pred=2.169
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (50.4s)
+
+  === Acquisition 199 ===
+    Recon DAS ...
+    PSNR=18.53 dB  SSIM=0.3510  SNR=15.60 dB  CR_gt=-0.67 dB  CR_pred=-0.43 dB  CNR_gt=0.093  CNR_pred=0.140
+    Speckle SNR  gt=2.251  pred=5.112
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (49.2s)
+
+  DAS cache: 18 hits, 12 misses, dir=/root/autodl-tmp/毕业设计/Ultrasound/data_epfl/.das_cache/invivo_vol002_6regions_F200_A4_frames_Gacquisition_9cb23c1ab3
+
+  --- B-mode 汇总 (15 acquisitions) ---
+    bmode_SNR_dB_mean: 13.3428
+    bmode_SNR_dB_std: 0.9906
+    bmode_PSNR_dB_mean: 16.9772
+    bmode_PSNR_dB_std: 0.7228
+    bmode_SSIM_mean: 0.2942
+    bmode_SSIM_std: 0.0437
+    contrast_gt_dB_mean: -4.8032
+    contrast_gt_dB_std: 3.7099
+    contrast_pred_dB_mean: -1.2303
+    contrast_pred_dB_std: 3.5038
+    cnr_gt_mean: 0.3761
+    cnr_gt_std: 0.1689
+    cnr_pred_mean: 0.2801
+    cnr_pred_std: 0.1515
+    speckle_SNR_gt_mean: 2.2630
+    speckle_SNR_gt_std: 0.1850
+    speckle_SNR_pred_mean: 2.2986
+    speckle_SNR_pred_std: 0.9524
+    speckle_FWHM_axial_gt_mm_mean: 0.1380
+    speckle_FWHM_axial_gt_mm_std: 0.1475
+    speckle_FWHM_axial_pred_mm_mean: 0.0591
+    speckle_FWHM_axial_pred_mm_std: 0.1183
+    speckle_FWHM_lateral_gt_mm_mean: 0.2453
+    speckle_FWHM_lateral_gt_mm_std: 0.2295
+    speckle_FWHM_lateral_pred_mm_mean: 0.3373
+    speckle_FWHM_lateral_pred_mm_std: 0.2034
+  das_bmode_comparison.png saved
+
+============================================================
+  Model: FISTA-DWT-Lite-2D | Params: 4,184,704
+  Evaluated: 4400 samples (per-frame)
+  SNR  (per-frame): 10.89 +/- 1.85 dB
+  PSNR (per-frame): 35.81 +/- 1.50 dB
+  SSIM (per-frame): 0.8902 +/- 0.0364
+  NMSE (per-frame): 0.0899 +/- 0.0450
+  Results saved to: model/Lite2D_invivo_vol002_6regions_F200_A4_frames_Gacquisition_20260510_005942/eval_best_model_das_quick
+============================================================
+
+评估完成! 结果保存至: model/Lite2D_invivo_vol002_6regions_F200_A4_frames_Gacquisition_20260510_005942/eval_best_model_das_quick

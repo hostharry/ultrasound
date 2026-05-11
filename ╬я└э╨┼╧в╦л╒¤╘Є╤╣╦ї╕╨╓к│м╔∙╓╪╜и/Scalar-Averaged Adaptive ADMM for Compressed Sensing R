@@ -1,0 +1,1042 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e6acb22e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: scikit-image in /home/kerneluser/.local/lib/python3.12/site-packages "
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "(0.25.2)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: pywavelets in /home/kerneluser/.local/lib/python3.12/site-packages (1"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      ".9.0)\n",
+      "Requirement already satisfied: pillow in /app/miniconda/lib/python3.12/site-packages (12.0.0)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: tqdm in /app/miniconda/lib/python3.12/site-packages (4.67.1)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: numpy>=1.24 in /app/miniconda/lib/python3.12/site-packages (from scik"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "it-image) (1.26.4)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: scipy>=1.11.4 in /app/miniconda/lib/python3.12/site-packages (from sc"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "ikit-image) (1.16.2)\n",
+      "Requirement already satisfied: networkx>=3.0 in /app/miniconda/lib/python3.12/s"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "ite-packages (from scikit-image) (3.5)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: imageio!=2.35.0,>=2.33 in /home/kerneluser/.local/lib/python3.12/site"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "-packages (from scikit-image) (2.37.2)\n",
+      "Requirement already satisfied: tifffile>=2022.8.12 in /home/k"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "erneluser/.local/lib/python3.12/site-packages (from scikit-image) (2025.10.16)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: packaging>=21 in /app/miniconda/lib/python3.12/site-packages (from sc"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "ikit-image) (24.2)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Requirement already satisfied: lazy-loader>=0.4 in /home/kerneluser/.local/lib/python3.12/site-packa"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "ges (from scikit-image) (0.4)\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "%%bash\n",
+    "pip install --user scikit-image pywavelets pillow tqdm\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8640a260",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "All libraries imported successfully\n",
+      "NumPy version: 1.26.4\n",
+      "Pandas version: 2.3.2\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "import sys\n",
+    "sys.path.insert(0, '/home/kerneluser/.local/lib/python3.12/site-packages')\n",
+    "\n",
+    "# Import necessary libraries\n",
+    "import numpy as np\n",
+    "import pandas as pd\n",
+    "from pathlib import Path\n",
+    "from PIL import Image\n",
+    "import matplotlib.pyplot as plt\n",
+    "from skimage.metrics import structural_similarity as ssim\n",
+    "from skimage.metrics import peak_signal_noise_ratio as psnr\n",
+    "from skimage.filters import sobel\n",
+    "from scipy.sparse.linalg import LinearOperator, cg\n",
+    "import pywt\n",
+    "from tqdm import tqdm\n",
+    "import warnings\n",
+    "warnings.filterwarnings('ignore')\n",
+    "\n",
+    "print(\"All libraries imported successfully\")\n",
+    "print(f\"NumPy version: {np.__version__}\")\n",
+    "print(f\"Pandas version: {pd.__version__}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b278c12f",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Baseline results loaded: (120, 10)\n",
+      "\n",
+      "Columns: ['Image', 'Type', 'PSNR_Full', 'SSIM_Full', 'PSNR_Tumor', 'SSIM_Tumor', 'PSNR_Background', 'SSIM_Background', 'Time', 'Method']\n",
+      "\n",
+      "First few rows:\n",
+      "       Image    Type  PSNR_Full  SSIM_Full  PSNR_Tumor  SSIM_Tumor  \\\n",
+      "0   benign_1  benign  17.888879   0.305554   10.570245    0.995544   \n",
+      "1   benign_1  benign  19.401538   0.356993    8.439374    0.062666   \n",
+      "2   benign_1  benign  18.069087   0.300762    9.586036    0.995067   \n",
+      "3   benign_1  benign  12.771728   0.097578   13.959448    0.258164   \n",
+      "4  benign_10  benign  17.654585   0.300981   17.356752    0.918219   \n",
+      "\n",
+      "   PSNR_Background  SSIM_Background       Time         Method  \n",
+      "0        17.958390         0.316281  35.354734  Adaptive-HASA  \n",
+      "1        19.593575         0.356993  12.165168    Static-HASA  \n",
+      "2        18.165130         0.312169   1.371800        TV-only  \n",
+      "3        12.767815         0.097578  11.284246   Wavelet-only  \n",
+      "4        17.682446         0.374770  34.489440  Adaptive-HASA  \n",
+      "\n",
+      "Unique methods: N/A\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Load the baseline results from previous analysis\n",
+    "baseline_df = pd.read_csv('reconstruction_results_15percent_all_methods.csv')\n",
+    "print(f\"Baseline results loaded: {baseline_df.shape}\")\n",
+    "print(f\"\\nColumns: {baseline_df.columns.tolist()}\")\n",
+    "print(f\"\\nFirst few rows:\")\n",
+    "print(baseline_df.head())\n",
+    "print(f\"\\nUnique methods: {baseline_df['method'].unique() if 'method' in baseline_df.columns else 'N/A'}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "32752b1f",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Method column values:\n",
+      "Method\n",
+      "Adaptive-HASA    30\n",
+      "Static-HASA      30\n",
+      "TV-only          30\n",
+      "Wavelet-only     30\n",
+      "Name: count, dtype: int64\n",
+      "\n",
+      "Total images per type:\n",
+      "Type\n",
+      "benign       15\n",
+      "malignant    15\n",
+      "Name: Image, dtype: int64\n",
+      "\n",
+      "FISTA-HASA (Adaptive-HASA) results: 30 images\n",
+      "Images covered: ['benign_1', 'benign_10', 'benign_11', 'benign_12', 'benign_13', 'benign_14', 'benign_15', 'benign_2', 'benign_3', 'benign_4', 'benign_5', 'benign_6', 'benign_7', 'benign_8', 'benign_9', 'malignant_1', 'malignant_10', 'malignant_11', 'malignant_12', 'malignant_13', 'malignant_14', 'malignant_15', 'malignant_2', 'malignant_3', 'malignant_4', 'malignant_5', 'malignant_6', 'malignant_7', 'malignant_8', 'malignant_9']\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Check the Method column more carefully\n",
+    "print(f\"Method column values:\")\n",
+    "print(baseline_df['Method'].value_counts())\n",
+    "print(f\"\\nTotal images per type:\")\n",
+    "print(baseline_df.groupby('Type')['Image'].nunique())\n",
+    "\n",
+    "# Filter for FISTA-HASA baseline (Adaptive-HASA)\n",
+    "fista_hasa_df = baseline_df[baseline_df['Method'] == 'Adaptive-HASA'].copy()\n",
+    "print(f\"\\nFISTA-HASA (Adaptive-HASA) results: {len(fista_hasa_df)} images\")\n",
+    "print(f\"Images covered: {sorted(fista_hasa_df['Image'].unique())}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0a7a0a00",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Core simulation functions defined\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Define core simulation functions for compressed sensing\n",
+    "def load_and_preprocess_image(img_path, target_size=(128, 128)):\n",
+    "    \"\"\"Load image, resize, convert to grayscale, normalize to [0,1]\"\"\"\n",
+    "    img = Image.open(img_path).convert('L')\n",
+    "    img = img.resize(target_size, Image.BILINEAR)\n",
+    "    img_array = np.array(img, dtype=np.float64) / 255.0\n",
+    "    return img_array\n",
+    "\n",
+    "def load_mask(mask_path, target_size=(128, 128)):\n",
+    "    \"\"\"Load and preprocess mask\"\"\"\n",
+    "    mask = Image.open(mask_path).convert('L')\n",
+    "    mask = mask.resize(target_size, Image.NEAREST)\n",
+    "    mask_array = np.array(mask, dtype=np.float64) / 255.0\n",
+    "    mask_array = (mask_array > 0.5).astype(np.float64)\n",
+    "    return mask_array\n",
+    "\n",
+    "def create_measurement_matrix(n, m, seed=42):\n",
+    "    \"\"\"Create random Gaussian measurement matrix\"\"\"\n",
+    "    rng = np.random.RandomState(seed)\n",
+    "    A = rng.randn(m, n) / np.sqrt(m)\n",
+    "    return A\n",
+    "\n",
+    "def add_noise_to_measurements(y, target_snr_db=25, seed=43):\n",
+    "    \"\"\"Add Gaussian noise to measurements to achieve target SNR\"\"\"\n",
+    "    rng = np.random.RandomState(seed)\n",
+    "    signal_power = np.mean(y ** 2)\n",
+    "    snr_linear = 10 ** (target_snr_db / 10)\n",
+    "    noise_power = signal_power / snr_linear\n",
+    "    noise = rng.randn(len(y)) * np.sqrt(noise_power)\n",
+    "    return y + noise\n",
+    "\n",
+    "def compute_lipschitz_constant(A, max_iter=100):\n",
+    "    \"\"\"Estimate Lipschitz constant as largest eigenvalue of A^T A using power iteration\"\"\"\n",
+    "    n = A.shape[1]\n",
+    "    x = np.random.randn(n)\n",
+    "    x = x / np.linalg.norm(x)\n",
+    "    \n",
+    "    for _ in range(max_iter):\n",
+    "        x = A.T @ (A @ x)\n",
+    "        x = x / np.linalg.norm(x)\n",
+    "    \n",
+    "    L = np.linalg.norm(A @ x) ** 2\n",
+    "    return L\n",
+    "\n",
+    "print(\"Core simulation functions defined\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "02b7b209",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Adaptive weight computation functions defined\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Define adaptive weight computation functions\n",
+    "def compute_local_gradient_strength(img, window_size=3):\n",
+    "    \"\"\"Compute local gradient magnitude for adaptive TV weighting\"\"\"\n",
+    "    grad_y, grad_x = np.gradient(img)\n",
+    "    grad_mag = np.sqrt(grad_x**2 + grad_y**2)\n",
+    "    \n",
+    "    # Apply local averaging to smooth the gradient map\n",
+    "    from scipy.ndimage import uniform_filter\n",
+    "    local_grad = uniform_filter(grad_mag, size=window_size)\n",
+    "    \n",
+    "    return local_grad\n",
+    "\n",
+    "def compute_local_entropy(img, window_size=3):\n",
+    "    \"\"\"Compute local entropy for adaptive wavelet weighting\"\"\"\n",
+    "    from scipy.stats import entropy as scipy_entropy\n",
+    "    from skimage.util import view_as_windows\n",
+    "    \n",
+    "    # Quantize image to compute entropy\n",
+    "    img_quantized = (img * 255).astype(np.uint8)\n",
+    "    \n",
+    "    # Pad image to handle boundaries\n",
+    "    pad_size = window_size // 2\n",
+    "    img_padded = np.pad(img_quantized, pad_size, mode='reflect')\n",
+    "    \n",
+    "    # Create sliding windows\n",
+    "    windows = view_as_windows(img_padded, (window_size, window_size))\n",
+    "    \n",
+    "    # Compute entropy for each window\n",
+    "    entropy_map = np.zeros(img.shape)\n",
+    "    for i in range(windows.shape[0]):\n",
+    "        for j in range(windows.shape[1]):\n",
+    "            window = windows[i, j].flatten()\n",
+    "            hist, _ = np.histogram(window, bins=16, range=(0, 255))\n",
+    "            hist = hist / hist.sum()\n",
+    "            entropy_map[i, j] = scipy_entropy(hist + 1e-10)\n",
+    "    \n",
+    "    return entropy_map\n",
+    "\n",
+    "def compute_adaptive_weights(img, base_lambda_tv=0.01, base_lambda_wav=0.01):\n",
+    "    \"\"\"\n",
+    "    Compute spatially-varying weight maps for TV and wavelet regularization.\n",
+    "    Returns normalized spatial maps.\n",
+    "    \"\"\"\n",
+    "    # Compute local features\n",
+    "    grad_strength = compute_local_gradient_strength(img)\n",
+    "    local_ent = compute_local_entropy(img)\n",
+    "    \n",
+    "    # Normalize features to [0, 1]\n",
+    "    grad_norm = (grad_strength - grad_strength.min()) / (grad_strength.max() - grad_strength.min() + 1e-10)\n",
+    "    ent_norm = (local_ent - local_ent.min()) / (local_ent.max() - local_ent.min() + 1e-10)\n",
+    "    \n",
+    "    # Create weight maps: increase regularization at edges (high gradient)\n",
+    "    # and at high entropy regions\n",
+    "    tv_weight_map = base_lambda_tv * (1.0 + grad_norm)\n",
+    "    wav_weight_map = base_lambda_wav * (1.0 + ent_norm)\n",
+    "    \n",
+    "    return tv_weight_map, wav_weight_map\n",
+    "\n",
+    "print(\"Adaptive weight computation functions defined\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a9c1ae52",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Proximal operators defined\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Define TV and Wavelet proximal operators for ADMM\n",
+    "def tv_prox_operator(v, lambda_tv, max_iter=100):\n",
+    "    \"\"\"\n",
+    "    TV proximal operator using Chambolle's algorithm.\n",
+    "    For scalar lambda_tv, uses skimage implementation.\n",
+    "    \"\"\"\n",
+    "    from skimage.restoration import denoise_tv_chambolle\n",
+    "    # Weight parameter in skimage is the inverse of our lambda\n",
+    "    weight = 1.0 / lambda_tv if lambda_tv > 0 else 1e10\n",
+    "    return denoise_tv_chambolle(v, weight=weight, max_num_iter=max_iter)\n",
+    "\n",
+    "def wavelet_soft_threshold(coeffs, threshold):\n",
+    "    \"\"\"Apply soft thresholding to wavelet coefficients\"\"\"\n",
+    "    return pywt.threshold(coeffs, threshold, mode='soft')\n",
+    "\n",
+    "def wavelet_prox_operator(v, lambda_wav, wavelet='db4', level=3):\n",
+    "    \"\"\"\n",
+    "    Wavelet proximal operator using soft thresholding.\n",
+    "    Handles PyWavelets coefficient structure properly.\n",
+    "    \"\"\"\n",
+    "    # Reshape v to 2D if needed\n",
+    "    shape = v.shape\n",
+    "    if len(shape) == 1:\n",
+    "        # Assume square image\n",
+    "        n = int(np.sqrt(len(v)))\n",
+    "        v_2d = v.reshape(n, n)\n",
+    "    else:\n",
+    "        v_2d = v\n",
+    "    \n",
+    "    # Wavelet decomposition\n",
+    "    coeffs = pywt.wavedec2(v_2d, wavelet=wavelet, level=level, mode='periodization')\n",
+    "    \n",
+    "    # Apply soft thresholding to detail coefficients (not approximation)\n",
+    "    coeffs_thresh = [coeffs[0]]  # Keep approximation unchanged\n",
+    "    for detail_level in coeffs[1:]:\n",
+    "        coeffs_thresh.append(tuple(wavelet_soft_threshold(c, lambda_wav) for c in detail_level))\n",
+    "    \n",
+    "    # Reconstruct\n",
+    "    v_denoised = pywt.waverec2(coeffs_thresh, wavelet=wavelet, mode='periodization')\n",
+    "    \n",
+    "    # Handle size mismatch due to pywavelets\n",
+    "    if v_denoised.shape != v_2d.shape:\n",
+    "        v_denoised = v_denoised[:v_2d.shape[0], :v_2d.shape[1]]\n",
+    "    \n",
+    "    # Return in original shape\n",
+    "    if len(shape) == 1:\n",
+    "        return v_denoised.flatten()\n",
+    "    else:\n",
+    "        return v_denoised\n",
+    "\n",
+    "print(\"Proximal operators defined\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "cdff5309",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Scalar-Averaged Adaptive ADMM solver defined (fixed)\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Define the Scalar-Averaged Adaptive ADMM solver\n",
+    "def admm_scalar_averaged_adaptive(A, y, img_shape, rho=1.0, max_iter=100, \n",
+    "                                   base_lambda_tv=0.01, base_lambda_wav=0.01,\n",
+    "                                   tol=1e-4, cg_maxiter=100):\n",
+    "    \"\"\"\n",
+    "    ADMM solver with scalar-averaged adaptive weights.\n",
+    "    \n",
+    "    Key modification: At each iteration, compute spatial weight maps from current estimate,\n",
+    "    then AVERAGE them to scalar values before using in proximal operators.\n",
+    "    \n",
+    "    Args:\n",
+    "        A: Measurement matrix (m x n)\n",
+    "        y: Noisy measurements (m,)\n",
+    "        img_shape: Tuple (height, width) for reshaping\n",
+    "        rho: ADMM penalty parameter\n",
+    "        max_iter: Number of ADMM iterations\n",
+    "        base_lambda_tv: Base TV regularization parameter\n",
+    "        base_lambda_wav: Base wavelet regularization parameter\n",
+    "        tol: Convergence tolerance\n",
+    "        cg_maxiter: Max iterations for CG solver\n",
+    "        \n",
+    "    Returns:\n",
+    "        x: Reconstructed image (flattened)\n",
+    "        convergence_info: Dictionary with convergence metrics\n",
+    "    \"\"\"\n",
+    "    m, n = A.shape\n",
+    "    \n",
+    "    # Initialize variables\n",
+    "    x = A.T @ y  # Initial backprojection\n",
+    "    z1 = x.copy()  # TV auxiliary variable\n",
+    "    z2 = x.copy()  # Wavelet auxiliary variable\n",
+    "    u1 = np.zeros(n)  # TV scaled dual variable\n",
+    "    u2 = np.zeros(n)  # Wavelet scaled dual variable\n",
+    "    \n",
+    "    # Track convergence\n",
+    "    convergence_info = {\n",
+    "        'iterations': 0,\n",
+    "        'cg_failures': 0,\n",
+    "        'residuals': [],\n",
+    "        'lambda_tv_history': [],\n",
+    "        'lambda_wav_history': []\n",
+    "    }\n",
+    "    \n",
+    "    # Precompute A^T A as LinearOperator for CG solver\n",
+    "    def AtA_plus_2rho(v):\n",
+    "        return A.T @ (A @ v) + 2 * rho * v\n",
+    "    \n",
+    "    AtA_op = LinearOperator((n, n), matvec=AtA_plus_2rho)\n",
+    "    \n",
+    "    # ADMM iterations\n",
+    "    for k in range(max_iter):\n",
+    "        x_old = x.copy()\n",
+    "        \n",
+    "        # Step 1: x-update using Conjugate Gradient\n",
+    "        # Solve: (A^T A + 2*rho*I) x = A^T y + rho(z1 + z2 - u1 - u2)\n",
+    "        b = A.T @ y + rho * (z1 + z2 - u1 - u2)\n",
+    "        # Note: scipy.sparse.linalg.cg uses 'atol' not 'tol'\n",
+    "        x, cg_info = cg(AtA_op, b, x0=x, maxiter=cg_maxiter, atol=1e-6)\n",
+    "        \n",
+    "        # Check for CG convergence failure\n",
+    "        if cg_info > 0:\n",
+    "            convergence_info['cg_failures'] += 1\n",
+    "            # Continue with best estimate rather than failing completely\n",
+    "        \n",
+    "        # Step 2: Compute adaptive weights from current estimate\n",
+    "        x_2d = x.reshape(img_shape)\n",
+    "        tv_weight_map, wav_weight_map = compute_adaptive_weights(\n",
+    "            x_2d, base_lambda_tv=base_lambda_tv, base_lambda_wav=base_lambda_wav\n",
+    "        )\n",
+    "        \n",
+    "        # **CRITICAL AVERAGING STEP**: Average spatial maps to scalars\n",
+    "        lambda_tv_scalar = np.mean(tv_weight_map)\n",
+    "        lambda_wav_scalar = np.mean(wav_weight_map)\n",
+    "        \n",
+    "        # Track weight evolution\n",
+    "        convergence_info['lambda_tv_history'].append(lambda_tv_scalar)\n",
+    "        convergence_info['lambda_wav_history'].append(lambda_wav_scalar)\n",
+    "        \n",
+    "        # Step 3: z1-update (TV proximal with scalar weight)\n",
+    "        v1 = x + u1\n",
+    "        v1_2d = v1.reshape(img_shape)\n",
+    "        z1_2d = tv_prox_operator(v1_2d, rho * lambda_tv_scalar)\n",
+    "        z1 = z1_2d.flatten()\n",
+    "        \n",
+    "        # Step 4: z2-update (Wavelet proximal with scalar weight)\n",
+    "        v2 = x + u2\n",
+    "        v2_2d = v2.reshape(img_shape)\n",
+    "        z2_2d = wavelet_prox_operator(v2_2d, rho * lambda_wav_scalar)\n",
+    "        z2 = z2_2d.flatten()\n",
+    "        \n",
+    "        # Step 5: Dual variable updates\n",
+    "        u1 = u1 + (x - z1)\n",
+    "        u2 = u2 + (x - z2)\n",
+    "        \n",
+    "        # Check convergence\n",
+    "        primal_residual = np.linalg.norm(x - x_old) / (np.linalg.norm(x) + 1e-10)\n",
+    "        convergence_info['residuals'].append(primal_residual)\n",
+    "        \n",
+    "        if primal_residual < tol and k > 10:\n",
+    "            convergence_info['iterations'] = k + 1\n",
+    "            break\n",
+    "    else:\n",
+    "        convergence_info['iterations'] = max_iter\n",
+    "    \n",
+    "    return x, convergence_info\n",
+    "\n",
+    "print(\"Scalar-Averaged Adaptive ADMM solver defined (fixed)\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f187cf60",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Evaluation functions defined\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Define evaluation functions\n",
+    "def compute_tumor_roi_metrics(recon_img, ground_truth, mask):\n",
+    "    \"\"\"\n",
+    "    Compute PSNR and SSIM for tumor ROI using bounding box approach.\n",
+    "    Returns metrics only for images with valid tumor regions.\n",
+    "    \"\"\"\n",
+    "    # Check if mask has any tumor pixels\n",
+    "    if mask.sum() == 0:\n",
+    "        return None, None\n",
+    "    \n",
+    "    # Find bounding box of tumor region\n",
+    "    rows = np.any(mask, axis=1)\n",
+    "    cols = np.any(mask, axis=0)\n",
+    "    \n",
+    "    if not rows.any() or not cols.any():\n",
+    "        return None, None\n",
+    "    \n",
+    "    rmin, rmax = np.where(rows)[0][[0, -1]]\n",
+    "    cmin, cmax = np.where(cols)[0][[0, -1]]\n",
+    "    \n",
+    "    # Extract ROI from both images\n",
+    "    roi_recon = recon_img[rmin:rmax+1, cmin:cmax+1]\n",
+    "    roi_gt = ground_truth[rmin:rmax+1, cmin:cmax+1]\n",
+    "    \n",
+    "    # Compute metrics on bounding box\n",
+    "    if roi_recon.size > 0 and roi_gt.size > 0:\n",
+    "        roi_psnr = psnr(roi_gt, roi_recon, data_range=1.0)\n",
+    "        roi_ssim = ssim(roi_gt, roi_recon, data_range=1.0)\n",
+    "        return roi_psnr, roi_ssim\n",
+    "    else:\n",
+    "        return None, None\n",
+    "\n",
+    "def compute_full_image_metrics(recon_img, ground_truth):\n",
+    "    \"\"\"Compute PSNR and SSIM for full image\"\"\"\n",
+    "    img_psnr = psnr(ground_truth, recon_img, data_range=1.0)\n",
+    "    img_ssim = ssim(ground_truth, recon_img, data_range=1.0)\n",
+    "    return img_psnr, img_ssim\n",
+    "\n",
+    "print(\"Evaluation functions defined\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "84bbebd9",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Total test images: 30\n",
+      "Sample paths:\n",
+      "  benign_1: True, True\n",
+      "  benign_10: True, True\n",
+      "  benign_11: True, True\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Set up the test dataset: 30 images (15 benign, 15 malignant)\n",
+    "# Match the images from the baseline results\n",
+    "\n",
+    "data_dir = Path('Dataset_BUSI_with_GT')\n",
+    "\n",
+    "# Get the image list from baseline\n",
+    "test_images = sorted(fista_hasa_df['Image'].unique())\n",
+    "\n",
+    "# Create lookup dictionary for file paths\n",
+    "image_paths = {}\n",
+    "for img_name in test_images:\n",
+    "    # Parse image name (e.g., 'benign_1' or 'malignant_1')\n",
+    "    parts = img_name.split('_')\n",
+    "    img_type = parts[0]  # 'benign' or 'malignant'\n",
+    "    img_num = parts[1]   # '1', '2', etc.\n",
+    "    \n",
+    "    # Construct file paths\n",
+    "    img_file = data_dir / img_type / f\"{img_type} ({img_num}).png\"\n",
+    "    mask_file = data_dir / img_type / f\"{img_type} ({img_num})_mask.png\"\n",
+    "    \n",
+    "    image_paths[img_name] = {\n",
+    "        'image': img_file,\n",
+    "        'mask': mask_file,\n",
+    "        'type': img_type\n",
+    "    }\n",
+    "\n",
+    "print(f\"Total test images: {len(image_paths)}\")\n",
+    "print(f\"Sample paths:\")\n",
+    "for i, (name, paths) in enumerate(list(image_paths.items())[:3]):\n",
+    "    print(f\"  {name}: {paths['image'].exists()}, {paths['mask'].exists()}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "6b4da9c4",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Creating measurement matrix: 2457 x 16384 (sampling rate: 15.0%)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Starting reconstruction of 30 images...\n",
+      "ADMM parameters: rho=1.0, max_iter=100\n",
+      "Base regularization: lambda_tv=0.01, lambda_wav=0.01\n",
+      "\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:   0%|          | 0/30 [00:00<?, ?it/s]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:   3%|▎         | 1/30 [06:24<3:06:04, 384.98s/it]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:   7%|▋         | 2/30 [12:47<2:58:51, 383.27s/it]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:  10%|█         | 3/30 [19:02<2:50:48, 379.57s/it]"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Main reconstruction loop for all 30 test images\n",
+    "# Parameters: 15% sampling rate, 25dB SNR, seeds 42/43, rho=1.0, 100 iterations\n",
+    "\n",
+    "target_size = (128, 128)\n",
+    "img_size = target_size[0] * target_size[1]\n",
+    "sampling_rate = 0.15\n",
+    "num_measurements = int(img_size * sampling_rate)\n",
+    "snr_db = 25\n",
+    "meas_seed = 42\n",
+    "noise_seed = 43\n",
+    "\n",
+    "# ADMM parameters\n",
+    "rho = 1.0\n",
+    "max_iter = 100\n",
+    "base_lambda_tv = 0.01\n",
+    "base_lambda_wav = 0.01\n",
+    "\n",
+    "# Create measurement matrix (same for all images)\n",
+    "print(f\"Creating measurement matrix: {num_measurements} x {img_size} (sampling rate: {sampling_rate*100}%)\")\n",
+    "A = create_measurement_matrix(img_size, num_measurements, seed=meas_seed)\n",
+    "\n",
+    "# Storage for results\n",
+    "results = []\n",
+    "convergence_failures = 0\n",
+    "\n",
+    "print(f\"\\nStarting reconstruction of {len(image_paths)} images...\")\n",
+    "print(f\"ADMM parameters: rho={rho}, max_iter={max_iter}\")\n",
+    "print(f\"Base regularization: lambda_tv={base_lambda_tv}, lambda_wav={base_lambda_wav}\\n\")\n",
+    "\n",
+    "for img_name in tqdm(test_images, desc=\"Reconstructing images\"):\n",
+    "    try:\n",
+    "        # Load image and mask\n",
+    "        img_path = image_paths[img_name]['image']\n",
+    "        mask_path = image_paths[img_name]['mask']\n",
+    "        \n",
+    "        ground_truth = load_and_preprocess_image(img_path, target_size)\n",
+    "        mask = load_mask(mask_path, target_size)\n",
+    "        \n",
+    "        # Create compressed measurements\n",
+    "        x_true = ground_truth.flatten()\n",
+    "        y_clean = A @ x_true\n",
+    "        y_noisy = add_noise_to_measurements(y_clean, target_snr_db=snr_db, seed=noise_seed)\n",
+    "        \n",
+    "        # Reconstruct using Scalar-Averaged Adaptive ADMM\n",
+    "        x_recon, conv_info = admm_scalar_averaged_adaptive(\n",
+    "            A, y_noisy, target_size, \n",
+    "            rho=rho, max_iter=max_iter,\n",
+    "            base_lambda_tv=base_lambda_tv, \n",
+    "            base_lambda_wav=base_lambda_wav\n",
+    "        )\n",
+    "        \n",
+    "        # Reshape to image\n",
+    "        recon_img = x_recon.reshape(target_size)\n",
+    "        \n",
+    "        # Compute metrics\n",
+    "        full_psnr, full_ssim = compute_full_image_metrics(recon_img, ground_truth)\n",
+    "        tumor_psnr, tumor_ssim = compute_tumor_roi_metrics(recon_img, ground_truth, mask)\n",
+    "        \n",
+    "        # Track convergence failures\n",
+    "        if conv_info['cg_failures'] > 0:\n",
+    "            convergence_failures += 1\n",
+    "        \n",
+    "        # Store results\n",
+    "        results.append({\n",
+    "            'Image': img_name,\n",
+    "            'Type': image_paths[img_name]['type'],\n",
+    "            'PSNR_Full': full_psnr,\n",
+    "            'SSIM_Full': full_ssim,\n",
+    "            'PSNR_Tumor': tumor_psnr,\n",
+    "            'SSIM_Tumor': tumor_ssim,\n",
+    "            'ADMM_Iterations': conv_info['iterations'],\n",
+    "            'CG_Failures': conv_info['cg_failures'],\n",
+    "            'Final_Lambda_TV': conv_info['lambda_tv_history'][-1] if conv_info['lambda_tv_history'] else None,\n",
+    "            'Final_Lambda_Wav': conv_info['lambda_wav_history'][-1] if conv_info['lambda_wav_history'] else None\n",
+    "        })\n",
+    "        \n",
+    "    except Exception as e:\n",
+    "        print(f\"\\nError processing {img_name}: {str(e)}\")\n",
+    "        results.append({\n",
+    "            'Image': img_name,\n",
+    "            'Type': image_paths[img_name]['type'],\n",
+    "            'Error': str(e)\n",
+    "        })\n",
+    "\n",
+    "# Create results dataframe\n",
+    "results_df = pd.DataFrame(results)\n",
+    "\n",
+    "print(f\"\\n{'='*60}\")\n",
+    "print(f\"RECONSTRUCTION COMPLETE\")\n",
+    "print(f\"{'='*60}\")\n",
+    "print(f\"Total images processed: {len(results_df)}\")\n",
+    "print(f\"Total images with CG failures: {convergence_failures}\")\n",
+    "print(f\"\\nResults summary:\")\n",
+    "print(results_df[['Image', 'Type', 'SSIM_Tumor', 'ADMM_Iterations', 'CG_Failures']].head(10))\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3f37cd5b",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:  13%|█▎        | 4/30 [25:41<2:47:46, 387.19s/it]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:  17%|█▋        | 5/30 [32:19<2:43:02, 391.30s/it]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:  20%|██        | 6/30 [39:01<2:37:56, 394.85s/it]"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# The reconstruction is running but timing out due to computational intensity\n",
+    "# Let's implement a more efficient version and reduce iterations for stability testing\n",
+    "\n",
+    "# First, let's test with a smaller subset to verify the approach works\n",
+    "print(\"Testing with subset of 5 images to verify stability...\")\n",
+    "\n",
+    "# Take first 5 images only\n",
+    "test_images_subset = test_images[:5]\n",
+    "\n",
+    "# Storage for results\n",
+    "results = []\n",
+    "convergence_failures = 0\n",
+    "total_cg_failures = 0\n",
+    "\n",
+    "print(f\"\\nStarting reconstruction of {len(test_images_subset)} images...\")\n",
+    "\n",
+    "for img_name in test_images_subset:\n",
+    "    try:\n",
+    "        # Load image and mask\n",
+    "        img_path = image_paths[img_name]['image']\n",
+    "        mask_path = image_paths[img_name]['mask']\n",
+    "        \n",
+    "        ground_truth = load_and_preprocess_image(img_path, target_size)\n",
+    "        mask = load_mask(mask_path, target_size)\n",
+    "        \n",
+    "        # Create compressed measurements\n",
+    "        x_true = ground_truth.flatten()\n",
+    "        y_clean = A @ x_true\n",
+    "        y_noisy = add_noise_to_measurements(y_clean, target_snr_db=snr_db, seed=noise_seed)\n",
+    "        \n",
+    "        # Reconstruct using Scalar-Averaged Adaptive ADMM\n",
+    "        print(f\"  Processing {img_name}...\", end=' ')\n",
+    "        x_recon, conv_info = admm_scalar_averaged_adaptive(\n",
+    "            A, y_noisy, target_size, \n",
+    "            rho=rho, max_iter=max_iter,\n",
+    "            base_lambda_tv=base_lambda_tv, \n",
+    "            base_lambda_wav=base_lambda_wav,\n",
+    "            cg_maxiter=50  # Reduce CG iterations for speed\n",
+    "        )\n",
+    "        \n",
+    "        # Reshape to image\n",
+    "        recon_img = x_recon.reshape(target_size)\n",
+    "        \n",
+    "        # Compute metrics\n",
+    "        full_psnr, full_ssim = compute_full_image_metrics(recon_img, ground_truth)\n",
+    "        tumor_psnr, tumor_ssim = compute_tumor_roi_metrics(recon_img, ground_truth, mask)\n",
+    "        \n",
+    "        # Track convergence failures\n",
+    "        total_cg_failures += conv_info['cg_failures']\n",
+    "        if conv_info['cg_failures'] > 0:\n",
+    "            convergence_failures += 1\n",
+    "        \n",
+    "        print(f\"Done. CG failures: {conv_info['cg_failures']}, SSIM: {tumor_ssim:.4f if tumor_ssim else 'N/A'}\")\n",
+    "        \n",
+    "        # Store results\n",
+    "        results.append({\n",
+    "            'Image': img_name,\n",
+    "            'Type': image_paths[img_name]['type'],\n",
+    "            'PSNR_Full': full_psnr,\n",
+    "            'SSIM_Full': full_ssim,\n",
+    "            'PSNR_Tumor': tumor_psnr,\n",
+    "            'SSIM_Tumor': tumor_ssim,\n",
+    "            'ADMM_Iterations': conv_info['iterations'],\n",
+    "            'CG_Failures': conv_info['cg_failures'],\n",
+    "            'Final_Lambda_TV': conv_info['lambda_tv_history'][-1] if conv_info['lambda_tv_history'] else None,\n",
+    "            'Final_Lambda_Wav': conv_info['lambda_wav_history'][-1] if conv_info['lambda_wav_history'] else None\n",
+    "        })\n",
+    "        \n",
+    "    except Exception as e:\n",
+    "        print(f\"\\nError processing {img_name}: {str(e)}\")\n",
+    "        import traceback\n",
+    "        traceback.print_exc()\n",
+    "\n",
+    "# Create results dataframe\n",
+    "results_subset_df = pd.DataFrame(results)\n",
+    "\n",
+    "print(f\"\\n{'='*60}\")\n",
+    "print(f\"SUBSET TEST COMPLETE\")\n",
+    "print(f\"{'='*60}\")\n",
+    "print(f\"Images processed: {len(results_subset_df)}\")\n",
+    "print(f\"Images with CG failures: {convergence_failures}/{len(results_subset_df)}\")\n",
+    "print(f\"Total CG failures across all iterations: {total_cg_failures}\")\n",
+    "print(f\"\\nResults:\")\n",
+    "print(results_subset_df[['Image', 'Type', 'SSIM_Tumor', 'ADMM_Iterations', 'CG_Failures']])\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f6bfef6a",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "# The ADMM is running but very slow (6+ minutes per image)\n",
+    "# The entropy computation is the bottleneck (nested loops over all pixels)\n",
+    "# Let's optimize the entropy calculation and reduce ADMM iterations\n",
+    "\n",
+    "def compute_local_entropy_fast(img, window_size=3):\n",
+    "    \"\"\"Fast local entropy computation using vectorized operations\"\"\"\n",
+    "    from skimage.filters.rank import entropy as rank_entropy\n",
+    "    from skimage.morphology import disk\n",
+    "    \n",
+    "    # Convert to uint8 for rank filter\n",
+    "    img_uint8 = (img * 255).astype(np.uint8)\n",
+    "    \n",
+    "    # Use scikit-image's optimized rank entropy\n",
+    "    entropy_map = rank_entropy(img_uint8, disk(window_size//2))\n",
+    "    \n",
+    "    # Normalize to [0, 1]\n",
+    "    entropy_map = entropy_map.astype(np.float64) / 255.0\n",
+    "    \n",
+    "    return entropy_map\n",
+    "\n",
+    "def compute_adaptive_weights_fast(img, base_lambda_tv=0.01, base_lambda_wav=0.01):\n",
+    "    \"\"\"\n",
+    "    Fast version of adaptive weight computation using optimized entropy.\n",
+    "    \"\"\"\n",
+    "    # Compute local features\n",
+    "    grad_strength = compute_local_gradient_strength(img)\n",
+    "    local_ent = compute_local_entropy_fast(img)\n",
+    "    \n",
+    "    # Normalize features to [0, 1]\n",
+    "    grad_norm = (grad_strength - grad_strength.min()) / (grad_strength.max() - grad_strength.min() + 1e-10)\n",
+    "    ent_norm = (local_ent - local_ent.min()) / (local_ent.max() - local_ent.min() + 1e-10)\n",
+    "    \n",
+    "    # Create weight maps\n",
+    "    tv_weight_map = base_lambda_tv * (1.0 + grad_norm)\n",
+    "    wav_weight_map = base_lambda_wav * (1.0 + ent_norm)\n",
+    "    \n",
+    "    return tv_weight_map, wav_weight_map\n",
+    "\n",
+    "print(\"Fast adaptive weight functions defined\")\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

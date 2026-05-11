@@ -1,0 +1,12 @@
+fista_dwt_lite_2d 2D Training | FISTA_DWT_Lite_2D_ratio8_L4_d32_J1_ph64_20260331_235642
+  layers=4, params=5,073,280
+  amp=True
+  d_model=32, num_conv_blocks=2, conv_ks=5, dwt_levels=1
+  hasa: type=unet, hidden=16, num_layers=2, kernel=5, base_ch=16
+  patch_h=64, patch_stride=32
+  datasets=1, train=7395, val=1305
+
+[Epoch    1/200] Train: 0.648662 (7.01dB) | Val: 0.357932 (11.21dB, init:0.70) NMSE:0.081225 | RF:0.07698 Env:0.74466 Grad:0.47002 Stat:1.13514 Con:0.00000 | LR:0.000100 | 422.7s
+         rho1=0.973 rho2=0.973 eta=0.7030
+[Epoch    5/200] Train: 0.267754 (14.26dB) | Val: 0.268332 (14.32dB, init:0.70) NMSE:0.041467 | RF:0.03851 Env:0.59857 Grad:0.45012 Stat:0.92466 Con:0.00000 | LR:0.000100 | 422.2s
+         rho1=0.983 rho2=0.983 eta=0.7040

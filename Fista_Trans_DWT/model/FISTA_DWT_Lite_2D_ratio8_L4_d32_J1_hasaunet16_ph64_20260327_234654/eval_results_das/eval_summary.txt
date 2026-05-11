@@ -1,0 +1,33 @@
+Model: FISTA-DWT-Lite-2D
+Checkpoint: /home/user/毕业设计/Ultrasound/Fista_Trans_DWT/model/FISTA_DWT_Lite_2D_ratio8_L4_d32_J1_hasaunet16_ph64_20260327_234654/best_model.pth
+Params: 5,073,280
+Samples: 25 (per-frame)
+eval_all: True
+patch_h: None
+SNR (per-frame): 2.36 +/- 0.48 dB
+NMSE (per-frame): 0.5844 +/- 0.0658
+  sample_0: SNR=2.70 dB, NMSE=0.5367
+  sample_1: SNR=2.97 dB, NMSE=0.5042
+  sample_2: SNR=2.87 dB, NMSE=0.5164
+  sample_3: SNR=2.85 dB, NMSE=0.5183
+  sample_4: SNR=2.79 dB, NMSE=0.5266
+  sample_5: SNR=2.65 dB, NMSE=0.5431
+  sample_6: SNR=2.40 dB, NMSE=0.5754
+  sample_7: SNR=2.34 dB, NMSE=0.5837
+  sample_8: SNR=1.88 dB, NMSE=0.6487
+  sample_9: SNR=1.91 dB, NMSE=0.6447
+  sample_10: SNR=1.75 dB, NMSE=0.6681
+  sample_11: SNR=1.72 dB, NMSE=0.6724
+  sample_12: SNR=1.68 dB, NMSE=0.6788
+  sample_13: SNR=1.69 dB, NMSE=0.6784
+  sample_14: SNR=1.65 dB, NMSE=0.6838
+  sample_15: SNR=1.81 dB, NMSE=0.6596
+  sample_16: SNR=1.84 dB, NMSE=0.6544
+  sample_17: SNR=2.20 dB, NMSE=0.6024
+  sample_18: SNR=2.36 dB, NMSE=0.5809
+  sample_19: SNR=2.61 dB, NMSE=0.5486
+  sample_20: SNR=2.70 dB, NMSE=0.5372
+  sample_21: SNR=2.86 dB, NMSE=0.5174
+  sample_22: SNR=2.85 dB, NMSE=0.5187
+  sample_23: SNR=2.97 dB, NMSE=0.5050
+  sample_24: SNR=2.94 dB, NMSE=0.5078

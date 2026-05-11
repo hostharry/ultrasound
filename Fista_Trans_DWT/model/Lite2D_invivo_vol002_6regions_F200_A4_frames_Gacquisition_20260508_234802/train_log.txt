@@ -1,0 +1,8 @@
+fista_dwt_lite_2d 2D Training | Lite2D_invivo_vol002_6regions_F200_A4_frames_Gacquisition_20260508_234802
+  [0] N=2133, 帧=4400, patch=4400, train=3740, val=660, K=133
+  datasets=1, train=3740, val=660
+  layers=4, params=4,184,704
+  d_model=32, num_conv_blocks=2, conv_ks=5, dwt_levels=1
+  hasa: type=conv, hidden=16, num_layers=2, kernel=5, base_ch=16
+  patch_h=999, patch_stride=16
+  tgc_alpha=2.0

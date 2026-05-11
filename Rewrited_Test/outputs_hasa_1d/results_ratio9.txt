@@ -1,0 +1,27 @@
+Adaptive-HASA 1D 超声压缩感知重建结果
+==================================================
+数据集: ../dataset_fdbf_energy_mu_8_9_15.npz
+压缩比: 9x
+测试线数: 50
+迭代次数: 50
+
+Initial:
+  SNR:  -3.46 ± 2.06 dB
+  PSNR: 13.99 ± 3.93 dB
+
+TV-only:
+  SNR:  2.29 ± 1.52 dB
+  PSNR: 19.74 ± 2.91 dB
+
+Static-HASA:
+  SNR:  4.97 ± 1.82 dB
+  PSNR: 22.42 ± 2.70 dB
+
+Adaptive-HASA:
+  SNR:  5.46 ± 1.97 dB
+  PSNR: 22.91 ± 2.75 dB
+
+SNR 提升:
+  TV-only:       +5.75 dB
+  Static-HASA:   +8.43 dB
+  Adaptive-HASA: +8.92 dB

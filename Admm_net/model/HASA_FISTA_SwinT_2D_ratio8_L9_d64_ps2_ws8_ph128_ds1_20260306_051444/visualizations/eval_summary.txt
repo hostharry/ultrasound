@@ -1,0 +1,31 @@
+Model: HASA-FISTA-Transformer-2D
+Checkpoint: model/HASA_FISTA_SwinT_2D_ratio8_L9_d64_ps2_ws8_ph128_ds1_20260306_051444/best_model.pth
+Params: 3,038,607
+Samples: 25
+SNR: 4.04 +/- 0.56 dB
+NMSE: 0.3978 +/- 0.0541
+  patch_0: SNR=2.57 dB, NMSE=0.5533
+  patch_1: SNR=3.14 dB, NMSE=0.4856
+  patch_2: SNR=3.57 dB, NMSE=0.4398
+  patch_3: SNR=3.48 dB, NMSE=0.4482
+  patch_4: SNR=3.87 dB, NMSE=0.4104
+  patch_5: SNR=3.81 dB, NMSE=0.4160
+  patch_6: SNR=4.22 dB, NMSE=0.3787
+  patch_7: SNR=4.48 dB, NMSE=0.3563
+  patch_8: SNR=4.26 dB, NMSE=0.3751
+  patch_9: SNR=4.51 dB, NMSE=0.3537
+  patch_10: SNR=4.57 dB, NMSE=0.3489
+  patch_11: SNR=4.74 dB, NMSE=0.3358
+  patch_12: SNR=4.65 dB, NMSE=0.3431
+  patch_13: SNR=4.58 dB, NMSE=0.3479
+  patch_14: SNR=4.57 dB, NMSE=0.3488
+  patch_15: SNR=4.63 dB, NMSE=0.3443
+  patch_16: SNR=4.52 dB, NMSE=0.3535
+  patch_17: SNR=4.38 dB, NMSE=0.3647
+  patch_18: SNR=4.31 dB, NMSE=0.3707
+  patch_19: SNR=4.12 dB, NMSE=0.3872
+  patch_20: SNR=3.92 dB, NMSE=0.4053
+  patch_21: SNR=3.80 dB, NMSE=0.4170
+  patch_22: SNR=3.63 dB, NMSE=0.4338
+  patch_23: SNR=3.54 dB, NMSE=0.4430
+  patch_24: SNR=3.16 dB, NMSE=0.4835

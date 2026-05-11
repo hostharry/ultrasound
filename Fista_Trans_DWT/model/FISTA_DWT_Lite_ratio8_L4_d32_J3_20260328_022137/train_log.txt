@@ -1,0 +1,51 @@
+fista_dwt_lite Training | FISTA_DWT_Lite_ratio8_L4_d32_J3_20260328_022137
+  layers=4, params=878,852
+  d_model=32, nhead=4, hasa_layers=1
+  num_conv_blocks=2, conv_ks=5, dwt_levels=3
+  samples=256, train=231, val=25
+
+[Epoch    1/200] Train: 1.005637 (0.59dB) | Val: 0.453391 (3.47dB, init:6.01) NMSE:0.457019 | RF:0.41901 Env:0.34384 Con:0.00000 | LR:0.001000 | 4.8s
+         rho1=0.976 rho2=0.976 eta=0.6984 gamma=0.000
+[Epoch   10/200] Train: 0.143067 (8.11dB) | Val: 0.168114 (6.89dB, init:6.01) NMSE:0.238696 | RF:0.14993 Env:0.18182 Con:0.00000 | LR:0.000994 | 3.9s
+         rho1=0.997 rho2=0.997 eta=0.7012 gamma=0.000
+[Epoch   20/200] Train: 0.133510 (8.47dB) | Val: 0.161373 (7.13dB, init:6.01) NMSE:0.231055 | RF:0.14435 Env:0.17024 Con:0.00000 | LR:0.000976 | 3.9s
+         rho1=1.020 rho2=1.020 eta=0.7016 gamma=0.000
+[Epoch   30/200] Train: 0.111229 (8.81dB) | Val: 0.163242 (7.17dB, init:6.01) NMSE:0.232750 | RF:0.14637 Env:0.16874 Con:0.00000 | LR:0.000946 | 3.9s
+         rho1=1.038 rho2=1.038 eta=0.7033 gamma=0.000
+[Epoch   40/200] Train: 0.098647 (8.91dB) | Val: 0.176687 (7.13dB, init:6.01) NMSE:0.242603 | RF:0.15979 Env:0.16900 Con:0.00000 | LR:0.000905 | 4.0s
+         rho1=1.062 rho2=1.062 eta=0.7040 gamma=0.000
+[Epoch   50/200] Train: 0.078323 (9.54dB) | Val: 0.169256 (7.29dB, init:6.01) NMSE:0.234000 | RF:0.15262 Env:0.16634 Con:0.00000 | LR:0.000855 | 8.0s
+         rho1=1.086 rho2=1.086 eta=0.7050 gamma=0.000
+[Epoch   60/200] Train: 0.084716 (9.32dB) | Val: 0.166432 (7.46dB, init:6.01) NMSE:0.228066 | RF:0.15029 Env:0.16142 Con:0.00000 | LR:0.000796 | 8.1s
+         rho1=1.102 rho2=1.102 eta=0.7058 gamma=0.000
+[Epoch   70/200] Train: 0.068594 (10.04dB) | Val: 0.161640 (7.67dB, init:6.01) NMSE:0.222822 | RF:0.14575 Env:0.15888 Con:0.00000 | LR:0.000730 | 8.0s
+         rho1=1.113 rho2=1.113 eta=0.7076 gamma=0.000
+[Epoch   80/200] Train: 0.056996 (10.88dB) | Val: 0.149982 (7.98dB, init:6.01) NMSE:0.214343 | RF:0.13437 Env:0.15614 Con:0.00000 | LR:0.000658 | 8.0s
+         rho1=1.120 rho2=1.120 eta=0.7088 gamma=0.000
+[Epoch   90/200] Train: 0.051112 (11.26dB) | Val: 0.152229 (7.99dB, init:6.01) NMSE:0.215878 | RF:0.13703 Env:0.15200 Con:0.00000 | LR:0.000582 | 8.0s
+         rho1=1.124 rho2=1.124 eta=0.7106 gamma=0.000
+[Epoch  100/200] Train: 0.045051 (11.70dB) | Val: 0.148625 (8.16dB, init:6.01) NMSE:0.211961 | RF:0.13382 Env:0.14807 Con:0.00000 | LR:0.000505 | 7.9s
+         rho1=1.126 rho2=1.126 eta=0.7129 gamma=0.000
+[Epoch  110/200] Train: 0.045745 (11.87dB) | Val: 0.146624 (8.26dB, init:6.01) NMSE:0.210527 | RF:0.13195 Env:0.14669 Con:0.00000 | LR:0.000428 | 7.9s
+         rho1=1.126 rho2=1.126 eta=0.7152 gamma=0.000
+[Epoch  120/200] Train: 0.046486 (11.96dB) | Val: 0.145051 (8.31dB, init:6.01) NMSE:0.208758 | RF:0.13056 Env:0.14492 Con:0.00000 | LR:0.000352 | 8.1s
+         rho1=1.127 rho2=1.127 eta=0.7173 gamma=0.000
+[Epoch  130/200] Train: 0.039037 (12.47dB) | Val: 0.148543 (8.27dB, init:6.01) NMSE:0.212518 | RF:0.13414 Env:0.14403 Con:0.00000 | LR:0.000280 | 8.0s
+         rho1=1.129 rho2=1.129 eta=0.7189 gamma=0.000
+[Epoch  140/200] Train: 0.035407 (12.62dB) | Val: 0.147881 (8.24dB, init:6.01) NMSE:0.212046 | RF:0.13357 Env:0.14315 Con:0.00000 | LR:0.000214 | 8.0s
+         rho1=1.129 rho2=1.129 eta=0.7202 gamma=0.000
+[Epoch  150/200] Train: 0.039992 (12.81dB) | Val: 0.152155 (8.21dB, init:6.01) NMSE:0.218325 | RF:0.13786 Env:0.14300 Con:0.00000 | LR:0.000155 | 8.0s
+         rho1=1.129 rho2=1.129 eta=0.7213 gamma=0.000
+[Epoch  160/200] Train: 0.034219 (13.17dB) | Val: 0.149445 (8.24dB, init:6.01) NMSE:0.215982 | RF:0.13521 Env:0.14235 Con:0.00000 | LR:0.000105 | 8.0s
+         rho1=1.129 rho2=1.129 eta=0.7221 gamma=0.000
+[Epoch  170/200] Train: 0.035787 (13.08dB) | Val: 0.151242 (8.17dB, init:6.01) NMSE:0.217690 | RF:0.13699 Env:0.14249 Con:0.00000 | LR:0.000064 | 8.0s
+         rho1=1.130 rho2=1.130 eta=0.7226 gamma=0.000
+[Epoch  180/200] Train: 0.032507 (13.29dB) | Val: 0.152361 (8.14dB, init:6.01) NMSE:0.219229 | RF:0.13811 Env:0.14247 Con:0.00000 | LR:0.000034 | 8.0s
+         rho1=1.130 rho2=1.130 eta=0.7228 gamma=0.000
+[Epoch  190/200] Train: 0.031912 (13.34dB) | Val: 0.152213 (8.15dB, init:6.01) NMSE:0.219010 | RF:0.13797 Env:0.14244 Con:0.00000 | LR:0.000016 | 8.0s
+         rho1=1.130 rho2=1.130 eta=0.7230 gamma=0.000
+[Epoch  200/200] Train: 0.032386 (13.40dB) | Val: 0.152441 (8.14dB, init:6.01) NMSE:0.219297 | RF:0.13820 Env:0.14242 Con:0.00000 | LR:0.000010 | 7.9s
+         rho1=1.130 rho2=1.130 eta=0.7231 gamma=0.000
+
+最佳验证 SNR: 8.34 dB @ Epoch 123
+模型保存至: model/FISTA_DWT_Lite_ratio8_L4_d32_J3_20260328_022137

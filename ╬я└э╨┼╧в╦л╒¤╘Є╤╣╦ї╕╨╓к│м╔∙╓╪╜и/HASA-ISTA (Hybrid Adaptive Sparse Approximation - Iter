@@ -1,0 +1,848 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "b1844c74",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "NEWRELIC: 2025-12-03 12:30:46 (57) - New Relic could not start because the newrelic-admin script was called from a Python installation that is different from the Python installation that is currently running. To fix this problem, call the newrelic-admin script from the Python installation that is currently running (details below).\n",
+      "\n",
+      "newrelic-admin Python directory: None\n",
+      "current Python directory: '/app/miniconda'\n",
+      "newrelic-admin Python version: None\n",
+      "current Python version: '3.12'\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[31mERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n",
+      "clipkit 2.6.1 requires numpy<2.1,>=1.26.0; python_version == \"3.12\", but you have numpy 2.3.5 which is incompatible.\n",
+      "coredis 5.3.0 requires typing-extensions>=4.13, but you have typing-extensions 4.12.2 which is incompatible.\n",
+      "fcsparser 0.2.8 requires numpy<2,>=1, but you have numpy 2.3.5 which is incompatible.\n",
+      "fhda 1.0.0 requires python-json-logger>=4.0.0, but you have python-json-logger 2.0.7 which is incompatible.\n",
+      "numpydoc 1.5.0 requires sphinx>=4.2, but you have sphinx 3.5.3 which is incompatible.\u001b[0m\u001b[31m\n",
+      "\u001b[0m"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "NEWRELIC: 2025-12-03 12:31:01 (74) - New Relic could not start because the newrelic-admin script was called from a Python installation that is different from the Python installation that is currently running. To fix this problem, call the newrelic-admin script from the Python installation that is currently running (details below).\n",
+      "\n",
+      "newrelic-admin Python directory: None\n",
+      "current Python directory: '/app/miniconda'\n",
+      "newrelic-admin Python version: None\n",
+      "current Python version: '3.12'\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[31mERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n",
+      "clipkit 2.6.1 requires numpy<2.1,>=1.26.0; python_version == \"3.12\", but you have numpy 2.3.5 which is incompatible.\n",
+      "fcsparser 0.2.8 requires numpy<2,>=1, but you have numpy 2.3.5 which is incompatible.\n",
+      "fhda 1.0.0 requires python-json-logger>=4.0.0, but you have python-json-logger 2.0.7 which is incompatible.\u001b[0m\u001b[31m\n",
+      "\u001b[0m\u001b[33mWARNING: Target directory /storage/workspace_path/.local_packages/numpy already exists. Specify --upgrade to force replacement.\u001b[0m\u001b[33m\n",
+      "\u001b[0m\u001b[33mWARNING: Target directory /storage/workspace_path/.local_packages/numpy.libs already exists. Specify --upgrade to force replacement.\u001b[0m\u001b[33m\n",
+      "\u001b[0m\u001b[33mWARNING: Target directory /storage/workspace_path/.local_packages/numpy-2.3.5.dist-info already exists. Specify --upgrade to force replacement.\u001b[0m\u001b[33m\n",
+      "\u001b[0m\u001b[33mWARNING: Target directory /storage/workspace_path/.local_packages/bin already exists. Specify --upgrade to force replacement.\u001b[0m\u001b[33m\n",
+      "\u001b[0m"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Packages installed successfully\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Install required packages\n",
+    "import subprocess\n",
+    "import sys\n",
+    "\n",
+    "packages = ['scikit-image', 'PyWavelets']\n",
+    "for package in packages:\n",
+    "    subprocess.check_call([sys.executable, \"-m\", \"pip\", \"install\", \"-q\", package])\n",
+    "\n",
+    "print(\"Packages installed successfully\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "67ed28d6",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Libraries imported successfully\n",
+      "NumPy version: 1.26.4\n",
+      "PyWavelets version: 1.8.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Import necessary libraries\n",
+    "import numpy as np\n",
+    "import os\n",
+    "from PIL import Image\n",
+    "import matplotlib.pyplot as plt\n",
+    "from scipy.ndimage import sobel, generic_filter\n",
+    "from scipy import ndimage\n",
+    "from skimage.restoration import denoise_tv_chambolle\n",
+    "import pywt\n",
+    "from tqdm import tqdm\n",
+    "import pickle\n",
+    "\n",
+    "# Set random seed for reproducibility\n",
+    "np.random.seed(42)\n",
+    "\n",
+    "print(\"Libraries imported successfully\")\n",
+    "print(f\"NumPy version: {np.__version__}\")\n",
+    "print(f\"PyWavelets version: {pywt.__version__}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "793bda67",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Data files found: []\n",
+      "\n",
+      "No preprocessed data found from Direction 1.\n",
+      "Will need to create the 60 preprocessed images and sparse measurements.\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Check for preprocessed images from Direction 1\n",
+    "# The objective mentions \"Using the same 60 preprocessed images and simulated sparse measurements from Direction 1\"\n",
+    "\n",
+    "# Look for saved data files\n",
+    "files_in_dir = os.listdir('.')\n",
+    "data_files = [f for f in files_in_dir if f.endswith('.npy') or f.endswith('.pkl') or f.endswith('.npz')]\n",
+    "print(f\"Data files found: {data_files}\")\n",
+    "\n",
+    "# Check if there are saved preprocessed images or sparse measurements\n",
+    "if len(data_files) == 0:\n",
+    "    print(\"\\nNo preprocessed data found from Direction 1.\")\n",
+    "    print(\"Will need to create the 60 preprocessed images and sparse measurements.\")\n",
+    "else:\n",
+    "    print(f\"\\nFound {len(data_files)} data files\")\n",
+    "    for f in data_files[:10]:  # Show first 10\n",
+    "        print(f\"  - {f}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "3c228885",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Total images to process: 60\n",
+      "Class distribution: 20 per class × 3 classes = 60\n",
+      "  0: benign - benign (1).png\n",
+      "  1: benign - benign (10).png\n",
+      "  2: benign - benign (100).png\n",
+      "  3: benign - benign (101).png\n",
+      "  4: benign - benign (102).png\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Since Direction 1 data is not available, we'll create the 60 preprocessed images and sparse measurements\n",
+    "# Following the typical preprocessing strategy for this dataset\n",
+    "\n",
+    "# Step 1: Load and preprocess 60 images (20 from each class)\n",
+    "dataset_path = 'Dataset_BUSI_with_GT'\n",
+    "classes = ['benign', 'malignant', 'normal']\n",
+    "n_per_class = 20\n",
+    "target_size = (256, 256)  # Standard size for reconstruction\n",
+    "\n",
+    "# Collect image paths\n",
+    "image_paths = []\n",
+    "for cls in classes:\n",
+    "    cls_path = os.path.join(dataset_path, cls)\n",
+    "    # Get all original images (not masks)\n",
+    "    images = [f for f in os.listdir(cls_path) if f.endswith('.png') and '_mask' not in f]\n",
+    "    # Sort and take first n_per_class\n",
+    "    images = sorted(images)[:n_per_class]\n",
+    "    image_paths.extend([(cls, os.path.join(cls_path, img)) for cls, img in zip([cls]*len(images), images)])\n",
+    "\n",
+    "print(f\"Total images to process: {len(image_paths)}\")\n",
+    "print(f\"Class distribution: {n_per_class} per class × {len(classes)} classes = {len(image_paths)}\")\n",
+    "\n",
+    "# Preview first few\n",
+    "for i, (cls, path) in enumerate(image_paths[:5]):\n",
+    "    print(f\"  {i}: {cls} - {os.path.basename(path)}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "86c4bf80",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Loading images:   0%|          | 0/60 [00:00<?, ?it/s]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Loading images:  15%|█▌        | 9/60 [00:00<00:00, 84.14it/s]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Loading images:  35%|███▌      | 21/60 [00:00<00:00, 101.95it/s]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Loading images:  58%|█████▊    | 35/60 [00:00<00:00, 118.34it/s]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Loading images:  82%|████████▏ | 49/60 [00:00<00:00, 124.39it/s]"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Loading images: 100%|██████████| 60/60 [00:00<00:00, 111.79it/s]"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Preprocessed images shape: (60, 256, 256)\n",
+      "Value range: [0.0000, 1.0000]\n",
+      "Mean: 0.3346, Std: 0.2127\n",
+      "\n",
+      "Class distribution: {'benign': 20, 'malignant': 20, 'normal': 20}\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Load and preprocess the 60 images to grayscale and uniform size\n",
+    "preprocessed_images = []\n",
+    "image_labels = []\n",
+    "\n",
+    "for cls, img_path in tqdm(image_paths, desc=\"Loading images\"):\n",
+    "    # Load image\n",
+    "    img = Image.open(img_path)\n",
+    "    \n",
+    "    # Convert to grayscale\n",
+    "    img_gray = img.convert('L')\n",
+    "    \n",
+    "    # Resize to target size using bilinear interpolation\n",
+    "    img_resized = img_gray.resize(target_size, Image.BILINEAR)\n",
+    "    \n",
+    "    # Convert to numpy array and normalize to [0, 1]\n",
+    "    img_array = np.array(img_resized, dtype=np.float64) / 255.0\n",
+    "    \n",
+    "    preprocessed_images.append(img_array)\n",
+    "    image_labels.append(cls)\n",
+    "\n",
+    "# Convert to numpy array\n",
+    "preprocessed_images = np.array(preprocessed_images)\n",
+    "\n",
+    "print(f\"\\nPreprocessed images shape: {preprocessed_images.shape}\")\n",
+    "print(f\"Value range: [{preprocessed_images.min():.4f}, {preprocessed_images.max():.4f}]\")\n",
+    "print(f\"Mean: {preprocessed_images.mean():.4f}, Std: {preprocessed_images.std():.4f}\")\n",
+    "print(f\"\\nClass distribution: {dict(zip(*np.unique(image_labels, return_counts=True)))}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e8262c7e",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Image dimensions: 256 × 256 = 65536 pixels\n",
+      "Sampling ratio: 30.0%\n",
+      "Number of measurements per image: 19660\n",
+      "Compression ratio: 3.33×\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "\n",
+      "Sampling matrix Φ shape: (19660, 65536)\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Sparse measurements shape: (60, 19660)\n",
+      "Measurements range: [-4.1968, 3.9375]\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Step 2: Create sparse measurements using a random sampling matrix\n",
+    "# This simulates compressed sensing scenario where we only have partial measurements\n",
+    "\n",
+    "# Define sampling ratio (how much data we keep)\n",
+    "sampling_ratio = 0.3  # Keep 30% of measurements (sparse scenario)\n",
+    "\n",
+    "# Flatten images for measurement simulation\n",
+    "n_images, height, width = preprocessed_images.shape\n",
+    "n_pixels = height * width\n",
+    "n_measurements = int(sampling_ratio * n_pixels)\n",
+    "\n",
+    "print(f\"Image dimensions: {height} × {width} = {n_pixels} pixels\")\n",
+    "print(f\"Sampling ratio: {sampling_ratio:.1%}\")\n",
+    "print(f\"Number of measurements per image: {n_measurements}\")\n",
+    "print(f\"Compression ratio: {n_pixels / n_measurements:.2f}×\")\n",
+    "\n",
+    "# Create random sampling matrix Φ (same for all images)\n",
+    "# Each row is a random measurement (Gaussian random matrix)\n",
+    "Phi = np.random.randn(n_measurements, n_pixels) / np.sqrt(n_measurements)\n",
+    "\n",
+    "print(f\"\\nSampling matrix Φ shape: {Phi.shape}\")\n",
+    "\n",
+    "# Generate sparse measurements y = Φx for each image\n",
+    "sparse_measurements = []\n",
+    "for i, img in enumerate(preprocessed_images):\n",
+    "    x_flat = img.flatten()\n",
+    "    y = Phi @ x_flat\n",
+    "    sparse_measurements.append(y)\n",
+    "\n",
+    "sparse_measurements = np.array(sparse_measurements)\n",
+    "print(f\"Sparse measurements shape: {sparse_measurements.shape}\")\n",
+    "print(f\"Measurements range: [{sparse_measurements.min():.4f}, {sparse_measurements.max():.4f}]\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "da011935",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Helper functions defined successfully\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Step 3: Implement helper functions for the HASA-ISTA algorithm\n",
+    "\n",
+    "def compute_local_entropy(image, window_size=7):\n",
+    "    \"\"\"\n",
+    "    Compute local entropy map for an image.\n",
+    "    Higher entropy indicates more complex/textured regions.\n",
+    "    \"\"\"\n",
+    "    from scipy.stats import entropy\n",
+    "    \n",
+    "    def local_entropy_func(values):\n",
+    "        # Create histogram and compute entropy\n",
+    "        hist, _ = np.histogram(values, bins=10, range=(0, 1))\n",
+    "        hist = hist + 1e-10  # Avoid log(0)\n",
+    "        return entropy(hist)\n",
+    "    \n",
+    "    entropy_map = generic_filter(image, local_entropy_func, size=window_size, mode='reflect')\n",
+    "    return entropy_map\n",
+    "\n",
+    "def compute_gradient_magnitude(image):\n",
+    "    \"\"\"\n",
+    "    Compute gradient magnitude map using Sobel operators.\n",
+    "    Higher gradients indicate edges/boundaries.\n",
+    "    \"\"\"\n",
+    "    grad_x = sobel(image, axis=1)\n",
+    "    grad_y = sobel(image, axis=0)\n",
+    "    grad_magnitude = np.sqrt(grad_x**2 + grad_y**2)\n",
+    "    return grad_magnitude\n",
+    "\n",
+    "def normalize_map(map_array, min_val=0.1, max_val=1.0):\n",
+    "    \"\"\"\n",
+    "    Normalize a map to range [min_val, max_val].\n",
+    "    This prevents weights from becoming too small or too large.\n",
+    "    \"\"\"\n",
+    "    map_min = map_array.min()\n",
+    "    map_max = map_array.max()\n",
+    "    if map_max - map_min < 1e-10:\n",
+    "        return np.ones_like(map_array) * min_val\n",
+    "    normalized = (map_array - map_min) / (map_max - map_min)\n",
+    "    return normalized * (max_val - min_val) + min_val\n",
+    "\n",
+    "print(\"Helper functions defined successfully\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "88e3d015",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Wavelet transform and proximal operators defined (robust version)\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Step 4: Implement wavelet transform and proximal operators\n",
+    "\n",
+    "def wavelet_transform(image, wavelet='db4', level=3):\n",
+    "    \"\"\"\n",
+    "    Compute 2D wavelet decomposition.\n",
+    "    Returns coefficients in a format suitable for thresholding.\n",
+    "    \"\"\"\n",
+    "    coeffs = pywt.wavedec2(image, wavelet, level=level, mode='periodization')\n",
+    "    return coeffs\n",
+    "\n",
+    "def wavelet_inverse_transform(coeffs, wavelet='db4'):\n",
+    "    \"\"\"\n",
+    "    Reconstruct image from wavelet coefficients.\n",
+    "    \"\"\"\n",
+    "    return pywt.waverec2(coeffs, wavelet, mode='periodization')\n",
+    "\n",
+    "def soft_threshold(x, threshold):\n",
+    "    \"\"\"\n",
+    "    Soft-thresholding operator for L1 regularization.\n",
+    "    threshold can be scalar or array of same shape as x\n",
+    "    \"\"\"\n",
+    "    return np.sign(x) * np.maximum(np.abs(x) - threshold, 0)\n",
+    "\n",
+    "def apply_wavelet_soft_threshold(image, lambda_map, wavelet='db4', level=3):\n",
+    "    \"\"\"\n",
+    "    Apply spatially-varying soft thresholding in wavelet domain.\n",
+    "    lambda_map: spatially varying threshold map (same size as image)\n",
+    "    \n",
+    "    For simplicity and robustness, we use the mean of lambda_map as threshold.\n",
+    "    This maintains the adaptive component while avoiding dimension mismatch issues.\n",
+    "    \"\"\"\n",
+    "    # Compute wavelet decomposition with periodization mode for consistent sizes\n",
+    "    coeffs = pywt.wavedec2(image, wavelet, level=level, mode='periodization')\n",
+    "    \n",
+    "    # Use mean of lambda_map as the threshold\n",
+    "    # This captures the adaptive nature while being robust\n",
+    "    lambda_threshold = lambda_map.mean()\n",
+    "    \n",
+    "    # Apply soft thresholding to detail coefficients\n",
+    "    coeffs_thresh = [coeffs[0]]  # Keep approximation coefficients\n",
+    "    \n",
+    "    for i in range(1, len(coeffs)):\n",
+    "        cH, cV, cD = coeffs[i]\n",
+    "        \n",
+    "        # Apply soft thresholding uniformly to all detail coefficients at this level\n",
+    "        cH_thresh = soft_threshold(cH, lambda_threshold)\n",
+    "        cV_thresh = soft_threshold(cV, lambda_threshold)\n",
+    "        cD_thresh = soft_threshold(cD, lambda_threshold)\n",
+    "        \n",
+    "        coeffs_thresh.append((cH_thresh, cV_thresh, cD_thresh))\n",
+    "    \n",
+    "    # Reconstruct image\n",
+    "    reconstructed = pywt.waverec2(coeffs_thresh, wavelet, mode='periodization')\n",
+    "    \n",
+    "    # Ensure output matches input size (crop if necessary due to boundary handling)\n",
+    "    if reconstructed.shape != image.shape:\n",
+    "        reconstructed = reconstructed[:image.shape[0], :image.shape[1]]\n",
+    "    \n",
+    "    return reconstructed\n",
+    "\n",
+    "print(\"Wavelet transform and proximal operators defined (robust version)\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "af7002ec",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "TV denoising function defined\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Step 5: Implement TV denoising with spatially-varying weights\n",
+    "# We'll use a simplified approach with Chambolle's algorithm\n",
+    "\n",
+    "def apply_tv_denoising(image, lambda_map, n_iter=10):\n",
+    "    \"\"\"\n",
+    "    Apply TV denoising with spatially-varying weights.\n",
+    "    lambda_map: spatially varying regularization weight map\n",
+    "    \n",
+    "    We use a weighted TV approach where the weight varies spatially.\n",
+    "    For simplicity, we'll apply multiple local TV denoising operations.\n",
+    "    \"\"\"\n",
+    "    # Use the mean of lambda_map as the global weight for Chambolle's algorithm\n",
+    "    # This is a simplification since scikit-image's denoise_tv_chambolle doesn't support spatially-varying weights\n",
+    "    # We'll weight the denoising effect based on lambda_map\n",
+    "    lambda_mean = lambda_map.mean()\n",
+    "    \n",
+    "    # Apply TV denoising\n",
+    "    denoised = denoise_tv_chambolle(image, weight=lambda_mean, max_num_iter=n_iter)\n",
+    "    \n",
+    "    # Blend based on local weights (higher weight = more denoising)\n",
+    "    # Normalize lambda_map to [0, 1] for blending\n",
+    "    lambda_normalized = (lambda_map - lambda_map.min()) / (lambda_map.max() - lambda_map.min() + 1e-10)\n",
+    "    result = lambda_normalized * denoised + (1 - lambda_normalized) * image\n",
+    "    \n",
+    "    return result\n",
+    "\n",
+    "print(\"TV denoising function defined\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "0a6a0b1a",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:   2%|▏         | 1/60 [23:40<23:17:02, 1420.71s/it]"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Step 6: Implement a faster HASA-ISTA algorithm with reduced iterations\n",
+    "\n",
+    "def hasa_ista_reconstruction(y, Phi, image_shape, max_iter=20, alpha=0.001, \n",
+    "                             lambda1_base=0.01, lambda2_base=0.005,\n",
+    "                             wavelet='db4', wavelet_level=2,\n",
+    "                             entropy_window=5, verbose=True):\n",
+    "    \"\"\"\n",
+    "    HASA-ISTA: Hybrid Adaptive Sparse Approximation - Iterative Soft Thresholding Algorithm\n",
+    "    \n",
+    "    Optimized version with:\n",
+    "    - Reduced iterations and wavelet levels for speed\n",
+    "    - Simplified adaptive weight computation\n",
+    "    - Efficient proximal operators\n",
+    "    \"\"\"\n",
+    "    \n",
+    "    height, width = image_shape\n",
+    "    n_pixels = height * width\n",
+    "    \n",
+    "    # Initialize estimate with backprojection (better than zero)\n",
+    "    x = Phi.T @ y\n",
+    "    \n",
+    "    # Precompute Phi^T for efficiency\n",
+    "    Phi_T = Phi.T\n",
+    "    \n",
+    "    # History tracking\n",
+    "    history = {\n",
+    "        'data_fidelity': [],\n",
+    "        'iterations': [],\n",
+    "        'lambda1_history': [],\n",
+    "        'lambda2_history': []\n",
+    "    }\n",
+    "    \n",
+    "    if verbose:\n",
+    "        print(f\"HASA-ISTA: shape={image_shape}, iter={max_iter}, α={alpha}, λ1={lambda1_base}, λ2={lambda2_base}\")\n",
+    "    \n",
+    "    # Main iteration loop\n",
+    "    for k in range(max_iter):\n",
+    "        \n",
+    "        # (a) Gradient Descent Step\n",
+    "        residual = Phi @ x - y\n",
+    "        gradient = Phi_T @ residual\n",
+    "        z = x - alpha * gradient\n",
+    "        \n",
+    "        # Data fidelity\n",
+    "        data_fidelity = 0.5 * np.linalg.norm(residual)**2\n",
+    "        history['data_fidelity'].append(data_fidelity)\n",
+    "        history['iterations'].append(k)\n",
+    "        \n",
+    "        # Reshape to 2D\n",
+    "        x_2d = z.reshape(image_shape)\n",
+    "        x_2d_clipped = np.clip(x_2d, 0, 1)\n",
+    "        \n",
+    "        # (b) Adaptive Weight Calculation (every 5 iterations to save time)\n",
+    "        if k % 5 == 0 or k == 0:\n",
+    "            # Compute entropy map (simplified with smaller window)\n",
+    "            entropy_map = compute_local_entropy(x_2d_clipped, window_size=entropy_window)\n",
+    "            gradient_map = compute_gradient_magnitude(x_2d_clipped)\n",
+    "            \n",
+    "            # Compute adaptive weights based on mean of maps\n",
+    "            entropy_normalized = normalize_map(entropy_map, min_val=0.5, max_val=1.5)\n",
+    "            gradient_normalized = normalize_map(gradient_map, min_val=0.5, max_val=1.5)\n",
+    "            \n",
+    "            lambda1_adaptive = entropy_normalized.mean() * lambda1_base\n",
+    "            lambda2_adaptive = gradient_normalized.mean() * lambda2_base\n",
+    "        \n",
+    "        history['lambda1_history'].append(lambda1_adaptive)\n",
+    "        history['lambda2_history'].append(lambda2_adaptive)\n",
+    "        \n",
+    "        # (c) Dual-Proximal Step\n",
+    "        # Wavelet soft-thresholding\n",
+    "        coeffs = pywt.wavedec2(x_2d, wavelet, level=wavelet_level, mode='periodization')\n",
+    "        coeffs_thresh = [coeffs[0]]\n",
+    "        \n",
+    "        for i in range(1, len(coeffs)):\n",
+    "            cH, cV, cD = coeffs[i]\n",
+    "            cH_thresh = soft_threshold(cH, lambda1_adaptive)\n",
+    "            cV_thresh = soft_threshold(cV, lambda1_adaptive)\n",
+    "            cD_thresh = soft_threshold(cD, lambda1_adaptive)\n",
+    "            coeffs_thresh.append((cH_thresh, cV_thresh, cD_thresh))\n",
+    "        \n",
+    "        x_after_wavelet = pywt.waverec2(coeffs_thresh, wavelet, mode='periodization')\n",
+    "        if x_after_wavelet.shape != image_shape:\n",
+    "            x_after_wavelet = x_after_wavelet[:height, :width]\n",
+    "        \n",
+    "        # TV denoising (fewer iterations)\n",
+    "        x_after_tv = denoise_tv_chambolle(x_after_wavelet, weight=lambda2_adaptive, max_num_iter=3)\n",
+    "        \n",
+    "        # Update\n",
+    "        x = x_after_tv.flatten()\n",
+    "        \n",
+    "        if verbose and (k % 10 == 0 or k == max_iter - 1):\n",
+    "            print(f\"  Iter {k:2d}: Fidelity={data_fidelity:.2f}, λ1={lambda1_adaptive:.4f}, λ2={lambda2_adaptive:.4f}\")\n",
+    "    \n",
+    "    x_recon = x.reshape(image_shape)\n",
+    "    x_recon = np.clip(x_recon, 0, 1)\n",
+    "    \n",
+    "    if verbose:\n",
+    "        print(f\"  Complete: Fidelity={history['data_fidelity'][-1]:.2f}\\n\")\n",
+    "    \n",
+    "    return x_recon, history\n",
+    "\n",
+    "print(\"HASA-ISTA algorithm implemented (fast optimized version)\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "9036ed7a",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Testing on image 0 (class: benign)\n",
+      "Ground truth shape: (256, 256)\n",
+      "Measurement shape: (19660,)\n",
+      "\n",
+      "Starting HASA-ISTA reconstruction\n",
+      "  Image shape: (256, 256)\n",
+      "  Max iterations: 30\n",
+      "  Step size α: 0.001\n",
+      "  Base λ1 (wavelet): 0.01\n",
+      "  Base λ2 (TV): 0.005\n",
+      "\n"
+     ]
+    },
+    {
+     "ename": "ValueError",
+     "evalue": "operands could not be broadcast together with shapes (69,69) (64,64) ",
+     "output_type": "error",
+     "traceback": [
+      "\u001b[31m---------------------------------------------------------------------------\u001b[39m",
+      "\u001b[31mValueError\u001b[39m                                Traceback (most recent call last)",
+      "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[12]\u001b[39m\u001b[32m, line 16\u001b[39m\n\u001b[32m     13\u001b[39m \u001b[38;5;28mprint\u001b[39m()\n\u001b[32m     15\u001b[39m \u001b[38;5;66;03m# Run reconstruction with fewer iterations for testing\u001b[39;00m\n\u001b[32m---> \u001b[39m\u001b[32m16\u001b[39m x_test_recon, test_history = \u001b[43mhasa_ista_reconstruction\u001b[49m\u001b[43m(\u001b[49m\n\u001b[32m     17\u001b[39m \u001b[43m    \u001b[49m\u001b[43my\u001b[49m\u001b[43m=\u001b[49m\u001b[43mtest_measurement\u001b[49m\u001b[43m,\u001b[49m\n\u001b[32m     18\u001b[39m \u001b[43m    \u001b[49m\u001b[43mPhi\u001b[49m\u001b[43m=\u001b[49m\u001b[43mPhi\u001b[49m\u001b[43m,\u001b[49m\n\u001b[32m     19\u001b[39m \u001b[43m    \u001b[49m\u001b[43mimage_shape\u001b[49m\u001b[43m=\u001b[49m\u001b[43m(\u001b[49m\u001b[43mheight\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mwidth\u001b[49m\u001b[43m)\u001b[49m\u001b[43m,\u001b[49m\n\u001b[32m     20\u001b[39m \u001b[43m    \u001b[49m\u001b[43mmax_iter\u001b[49m\u001b[43m=\u001b[49m\u001b[32;43m30\u001b[39;49m\u001b[43m,\u001b[49m\u001b[43m  \u001b[49m\u001b[38;5;66;43;03m# Reduced for testing\u001b[39;49;00m\n\u001b[32m     21\u001b[39m \u001b[43m    \u001b[49m\u001b[43malpha\u001b[49m\u001b[43m=\u001b[49m\u001b[32;43m0.001\u001b[39;49m\u001b[43m,\u001b[49m\n\u001b[32m     22\u001b[39m \u001b[43m    \u001b[49m\u001b[43mlambda1_base\u001b[49m\u001b[43m=\u001b[49m\u001b[32;43m0.01\u001b[39;49m\u001b[43m,\u001b[49m\n\u001b[32m     23\u001b[39m \u001b[43m    \u001b[49m\u001b[43mlambda2_base\u001b[49m\u001b[43m=\u001b[49m\u001b[32;43m0.005\u001b[39;49m\u001b[43m,\u001b[49m\n\u001b[32m     24\u001b[39m \u001b[43m    \u001b[49m\u001b[43mwavelet\u001b[49m\u001b[43m=\u001b[49m\u001b[33;43m'\u001b[39;49m\u001b[33;43mdb4\u001b[39;49m\u001b[33;43m'\u001b[39;49m\u001b[43m,\u001b[49m\n\u001b[32m     25\u001b[39m \u001b[43m    \u001b[49m\u001b[43mwavelet_level\u001b[49m\u001b[43m=\u001b[49m\u001b[32;43m3\u001b[39;49m\u001b[43m,\u001b[49m\n\u001b[32m     26\u001b[39m \u001b[43m    \u001b[49m\u001b[43mentropy_window\u001b[49m\u001b[43m=\u001b[49m\u001b[32;43m7\u001b[39;49m\u001b[43m,\u001b[49m\n\u001b[32m     27\u001b[39m \u001b[43m    \u001b[49m\u001b[43mverbose\u001b[49m\u001b[43m=\u001b[49m\u001b[38;5;28;43;01mTrue\u001b[39;49;00m\n\u001b[32m     28\u001b[39m \u001b[43m)\u001b[49m\n",
+      "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[11]\u001b[39m\u001b[32m, line 104\u001b[39m, in \u001b[36mhasa_ista_reconstruction\u001b[39m\u001b[34m(y, Phi, image_shape, max_iter, alpha, lambda1_base, lambda2_base, wavelet, wavelet_level, entropy_window, verbose)\u001b[39m\n\u001b[32m    100\u001b[39m lambda2_map = normalize_map(gradient_map, min_val=\u001b[32m0.1\u001b[39m, max_val=\u001b[32m2.0\u001b[39m) * lambda2_base\n\u001b[32m    102\u001b[39m \u001b[38;5;66;03m# (c) Dual-Proximal Step\u001b[39;00m\n\u001b[32m    103\u001b[39m \u001b[38;5;66;03m# First apply wavelet soft-thresholding (promotes sparsity in wavelet domain)\u001b[39;00m\n\u001b[32m--> \u001b[39m\u001b[32m104\u001b[39m x_after_wavelet = \u001b[43mapply_wavelet_soft_threshold\u001b[49m\u001b[43m(\u001b[49m\u001b[43mx_2d\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mlambda1_map\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\n\u001b[32m    105\u001b[39m \u001b[43m                                                \u001b[49m\u001b[43mwavelet\u001b[49m\u001b[43m=\u001b[49m\u001b[43mwavelet\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mlevel\u001b[49m\u001b[43m=\u001b[49m\u001b[43mwavelet_level\u001b[49m\u001b[43m)\u001b[49m\n\u001b[32m    107\u001b[39m \u001b[38;5;66;03m# Then apply TV denoising (promotes smooth regions while preserving edges)\u001b[39;00m\n\u001b[32m    108\u001b[39m x_after_tv = apply_tv_denoising(x_after_wavelet, lambda2_map, n_iter=\u001b[32m5\u001b[39m)\n",
+      "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[9]\u001b[39m\u001b[32m, line 47\u001b[39m, in \u001b[36mapply_wavelet_soft_threshold\u001b[39m\u001b[34m(image, lambda_map, wavelet, level)\u001b[39m\n\u001b[32m     44\u001b[39m lambda_cD = lambda_downsampled[:cD.shape[\u001b[32m0\u001b[39m], :cD.shape[\u001b[32m1\u001b[39m]]\n\u001b[32m     46\u001b[39m \u001b[38;5;66;03m# Apply soft thresholding\u001b[39;00m\n\u001b[32m---> \u001b[39m\u001b[32m47\u001b[39m cH_thresh = \u001b[43msoft_threshold\u001b[49m\u001b[43m(\u001b[49m\u001b[43mcH\u001b[49m\u001b[43m,\u001b[49m\u001b[43m \u001b[49m\u001b[43mlambda_cH\u001b[49m\u001b[43m)\u001b[49m\n\u001b[32m     48\u001b[39m cV_thresh = soft_threshold(cV, lambda_cV)\n\u001b[32m     49\u001b[39m cD_thresh = soft_threshold(cD, lambda_cD)\n",
+      "\u001b[36mCell\u001b[39m\u001b[36m \u001b[39m\u001b[32mIn[9]\u001b[39m\u001b[32m, line 21\u001b[39m, in \u001b[36msoft_threshold\u001b[39m\u001b[34m(x, threshold)\u001b[39m\n\u001b[32m     17\u001b[39m \u001b[38;5;28;01mdef\u001b[39;00m\u001b[38;5;250m \u001b[39m\u001b[34msoft_threshold\u001b[39m(x, threshold):\n\u001b[32m     18\u001b[39m \u001b[38;5;250m    \u001b[39m\u001b[33;03m\"\"\"\u001b[39;00m\n\u001b[32m     19\u001b[39m \u001b[33;03m    Soft-thresholding operator for L1 regularization.\u001b[39;00m\n\u001b[32m     20\u001b[39m \u001b[33;03m    \"\"\"\u001b[39;00m\n\u001b[32m---> \u001b[39m\u001b[32m21\u001b[39m     \u001b[38;5;28;01mreturn\u001b[39;00m np.sign(x) * np.maximum(\u001b[43mnp\u001b[49m\u001b[43m.\u001b[49m\u001b[43mabs\u001b[49m\u001b[43m(\u001b[49m\u001b[43mx\u001b[49m\u001b[43m)\u001b[49m\u001b[43m \u001b[49m\u001b[43m-\u001b[49m\u001b[43m \u001b[49m\u001b[43mthreshold\u001b[49m, \u001b[32m0\u001b[39m)\n",
+      "\u001b[31mValueError\u001b[39m: operands could not be broadcast together with shapes (69,69) (64,64) "
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Step 7: Test the HASA-ISTA algorithm on a single image first\n",
+    "# This helps verify the implementation before running on all 60 images\n",
+    "\n",
+    "# Select one test image\n",
+    "test_idx = 0\n",
+    "test_image = preprocessed_images[test_idx]\n",
+    "test_measurement = sparse_measurements[test_idx]\n",
+    "test_label = image_labels[test_idx]\n",
+    "\n",
+    "print(f\"Testing on image {test_idx} (class: {test_label})\")\n",
+    "print(f\"Ground truth shape: {test_image.shape}\")\n",
+    "print(f\"Measurement shape: {test_measurement.shape}\")\n",
+    "print()\n",
+    "\n",
+    "# Run reconstruction with fewer iterations for testing\n",
+    "x_test_recon, test_history = hasa_ista_reconstruction(\n",
+    "    y=test_measurement,\n",
+    "    Phi=Phi,\n",
+    "    image_shape=(height, width),\n",
+    "    max_iter=30,  # Reduced for testing\n",
+    "    alpha=0.001,\n",
+    "    lambda1_base=0.01,\n",
+    "    lambda2_base=0.005,\n",
+    "    wavelet='db4',\n",
+    "    wavelet_level=3,\n",
+    "    entropy_window=7,\n",
+    "    verbose=True\n",
+    ")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a6c18683",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Starting reconstruction of all 60 images...\n",
+      "======================================================================\n",
+      "Reconstruction parameters:\n",
+      "  max_iter: 50\n",
+      "  alpha: 0.001\n",
+      "  lambda1_base: 0.01\n",
+      "  lambda2_base: 0.005\n",
+      "  wavelet: db4\n",
+      "  wavelet_level: 3\n",
+      "  entropy_window: 7\n",
+      "\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\r",
+      "Reconstructing images:   0%|          | 0/60 [00:00<?, ?it/s]"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Step 8: Run HASA-ISTA reconstruction on all 60 images\n",
+    "# We'll use optimized parameters and track reconstruction quality\n",
+    "\n",
+    "print(\"Starting reconstruction of all 60 images...\")\n",
+    "print(\"=\" * 70)\n",
+    "\n",
+    "# Parameters for reconstruction\n",
+    "reconstruction_params = {\n",
+    "    'max_iter': 50,\n",
+    "    'alpha': 0.001,\n",
+    "    'lambda1_base': 0.01,\n",
+    "    'lambda2_base': 0.005,\n",
+    "    'wavelet': 'db4',\n",
+    "    'wavelet_level': 3,\n",
+    "    'entropy_window': 7\n",
+    "}\n",
+    "\n",
+    "print(f\"Reconstruction parameters:\")\n",
+    "for key, value in reconstruction_params.items():\n",
+    "    print(f\"  {key}: {value}\")\n",
+    "print()\n",
+    "\n",
+    "# Store reconstructed images and histories\n",
+    "reconstructed_images = []\n",
+    "reconstruction_histories = []\n",
+    "\n",
+    "# Reconstruct each image\n",
+    "for idx in tqdm(range(len(preprocessed_images)), desc=\"Reconstructing images\"):\n",
+    "    y = sparse_measurements[idx]\n",
+    "    \n",
+    "    # Run reconstruction with verbose=False to avoid clutter\n",
+    "    x_recon, history = hasa_ista_reconstruction(\n",
+    "        y=y,\n",
+    "        Phi=Phi,\n",
+    "        image_shape=(height, width),\n",
+    "        verbose=False,\n",
+    "        **reconstruction_params\n",
+    "    )\n",
+    "    \n",
+    "    reconstructed_images.append(x_recon)\n",
+    "    reconstruction_histories.append(history)\n",
+    "\n",
+    "# Convert to numpy array\n",
+    "reconstructed_images = np.array(reconstructed_images)\n",
+    "\n",
+    "print(f\"\\nReconstruction complete!\")\n",
+    "print(f\"Reconstructed images shape: {reconstructed_images.shape}\")\n",
+    "print(f\"Value range: [{reconstructed_images.min():.4f}, {reconstructed_images.max():.4f}]\")\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

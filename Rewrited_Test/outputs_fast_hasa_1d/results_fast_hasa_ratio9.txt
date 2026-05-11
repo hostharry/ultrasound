@@ -1,0 +1,20 @@
+Fast-Adaptive-HASA 1D 超声重建结果
+==================================================
+
+数据集: ../dataset_fdbf_energy_mu_8_9_15.npz
+压缩比: 9x
+测试样本: 30
+
+Initial:
+  SNR: -6.31 ± 3.35 dB
+
+Slow Adaptive-HASA:
+  SNR:  5.30 ± 1.29 dB
+  Time: 60.4 ms/line
+
+Fast-Adaptive-HASA:
+  SNR:  5.36 ± 1.29 dB
+  Time: 53.0 ms/line
+
+加速比: 1.14x
+SNR 保持率: 101.1%

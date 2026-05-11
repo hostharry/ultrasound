@@ -1,0 +1,12 @@
+fista_dwt_lite_2d 2D Training | Lite2D_epfl_054GS_A20_frames_20260412_211920
+  layers=4, params=5,073,280
+  amp=True
+  DAS image loss: gamma=0.1, mode=log_l1, datasets=1/1
+  d_model=32, num_conv_blocks=2, conv_ks=5, dwt_levels=1
+  hasa: type=unet, hidden=16, num_layers=2, kernel=5, base_ch=16
+  patch_h=192, patch_stride=192
+  datasets=1, train=1479, val=261
+
+[Epoch    1/200] Train: 0.978219 (3.28dB) | Val: 0.465118 (8.60dB, init:0.70) NMSE:0.141141 | RF:0.14091 Env:0.88914 Grad:0.49443 Stat:1.12738 DAS:0.87841 BmPSNR:14.78 BmSSIM:0.1476 Con:0.00000 | LR:0.000100 | 256.0s
+         rho1=0.968 rho2=0.968 eta=0.6989
+  ** New best DAS PSNR: 14.78 dB @ Epoch 1

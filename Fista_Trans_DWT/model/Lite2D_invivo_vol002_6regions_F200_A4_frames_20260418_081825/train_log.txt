@@ -1,0 +1,24 @@
+fista_dwt_lite_2d 2D Training | Lite2D_invivo_vol002_6regions_F200_A4_frames_20260418_081825
+  layers=4, params=4,184,704
+  amp=True
+  DAS image loss: gamma=0.1, mode=kld_mslae, datasets=1/1
+  d_model=32, num_conv_blocks=2, conv_ks=5, dwt_levels=1
+  hasa: type=conv, hidden=16, num_layers=2, kernel=5, base_ch=16
+  patch_h=999, patch_stride=16
+  datasets=1, train=3740, val=660
+
+[Epoch    1/300] Train: 0.515241 (-0.14dB) | Val: 0.418995 (-0.08dB, init:0.70) NMSE:1.018210 | RF:0.36814 Env:0.01202 KLD:0.29571 DAS:0.20080 BmPSNR:8.31 BmSSIM:0.0875 Con:0.00000 | LR:0.000500 | 396.0s
+         rho1=0.983 rho2=0.983 eta=0.6979
+  ** New best DAS PSNR: 8.31 dB @ Epoch 1
+[Epoch    5/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000488 | 392.9s
+         rho1=0.990 rho2=0.990 eta=0.6975
+[Epoch   10/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000453 | 392.6s
+         rho1=0.990 rho2=0.990 eta=0.6975
+[Epoch   15/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000398 | 393.2s
+         rho1=0.990 rho2=0.990 eta=0.6975
+[Epoch   20/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000329 | 393.4s
+         rho1=0.990 rho2=0.990 eta=0.6975
+[Epoch   25/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000253 | 392.6s
+         rho1=0.990 rho2=0.990 eta=0.6975
+[Epoch   30/300] Train: nan (nandB) | Val: nan (nandB, init:0.70) NMSE:nan | RF:nan Env:nan BmPSNR:nan BmSSIM:nan Con:0.00000 | LR:0.000176 | 392.7s
+         rho1=0.990 rho2=0.990 eta=0.6975

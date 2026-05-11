@@ -1,0 +1,323 @@
+{
+ "cells": [
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "e8583636",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "NEWRELIC: 2025-12-03 15:31:13 (56) - New Relic could not start because the newrelic-admin script was called from a Python installation that is different from the Python installation that is currently running. To fix this problem, call the newrelic-admin script from the Python installation that is currently running (details below).\n",
+      "\n",
+      "newrelic-admin Python directory: None\n",
+      "current Python directory: '/app/miniconda'\n",
+      "newrelic-admin Python version: None\n",
+      "current Python version: '3.12'\n"
+     ]
+    },
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Packages installed successfully\n"
+     ]
+    },
+    {
+     "name": "stderr",
+     "output_type": "stream",
+     "text": [
+      "\u001b[31mERROR: pip's dependency resolver does not currently take into account all the packages that are installed. This behaviour is the source of the following dependency conflicts.\n",
+      "clipkit 2.6.1 requires numpy<2.1,>=1.26.0; python_version == \"3.12\", but you have numpy 2.3.5 which is incompatible.\n",
+      "coredis 5.3.0 requires typing-extensions>=4.13, but you have typing-extensions 4.12.2 which is incompatible.\n",
+      "fcsparser 0.2.8 requires numpy<2,>=1, but you have numpy 2.3.5 which is incompatible.\n",
+      "fhda 1.0.0 requires python-json-logger>=4.0.0, but you have python-json-logger 2.0.7 which is incompatible.\n",
+      "numpydoc 1.5.0 requires sphinx>=4.2, but you have sphinx 3.5.3 which is incompatible.\u001b[0m\u001b[31m\n",
+      "\u001b[0m"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Install required packages\n",
+    "import subprocess\n",
+    "import sys\n",
+    "\n",
+    "subprocess.check_call([sys.executable, \"-m\", \"pip\", \"install\", \"-q\", \"scikit-image\", \"PyWavelets\"])\n",
+    "print(\"Packages installed successfully\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "f31b7e70",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Libraries imported successfully\n",
+      "NumPy version: 1.26.4\n",
+      "PyWavelets version: 1.8.0\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Import all necessary libraries\n",
+    "import numpy as np\n",
+    "import os\n",
+    "import glob\n",
+    "from PIL import Image\n",
+    "import matplotlib.pyplot as plt\n",
+    "from skimage.metrics import peak_signal_noise_ratio as psnr\n",
+    "from skimage.metrics import structural_similarity as ssim\n",
+    "from skimage.restoration import denoise_tv_chambolle\n",
+    "import pywt\n",
+    "from scipy import ndimage\n",
+    "import pandas as pd\n",
+    "from scipy.stats import friedmanchisquare\n",
+    "import warnings\n",
+    "warnings.filterwarnings('ignore')\n",
+    "\n",
+    "print(\"Libraries imported successfully\")\n",
+    "print(f\"NumPy version: {np.__version__}\")\n",
+    "print(f\"PyWavelets version: {pywt.__version__}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "bdee9b1d",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Total benign images available: 437\n",
+      "Total malignant images available: 210\n",
+      "\n",
+      "Selected 15 benign images\n",
+      "Selected 15 malignant images\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Load the 30-image study set (15 benign, 15 malignant)\n",
+    "# First, let's identify which images to use (consistent with previous analyses)\n",
+    "\n",
+    "benign_dir = 'Dataset_BUSI_with_GT/benign/'\n",
+    "malignant_dir = 'Dataset_BUSI_with_GT/malignant/'\n",
+    "\n",
+    "# Get all benign and malignant images (excluding masks)\n",
+    "benign_images = sorted([f for f in os.listdir(benign_dir) if f.endswith('.png') and '_mask' not in f])\n",
+    "malignant_images = sorted([f for f in os.listdir(malignant_dir) if f.endswith('.png') and '_mask' not in f])\n",
+    "\n",
+    "print(f\"Total benign images available: {len(benign_images)}\")\n",
+    "print(f\"Total malignant images available: {len(malignant_images)}\")\n",
+    "\n",
+    "# Select 15 from each category using a fixed seed for reproducibility\n",
+    "np.random.seed(42)\n",
+    "selected_benign = np.random.choice(benign_images, 15, replace=False)\n",
+    "selected_malignant = np.random.choice(malignant_images, 15, replace=False)\n",
+    "\n",
+    "print(f\"\\nSelected {len(selected_benign)} benign images\")\n",
+    "print(f\"Selected {len(selected_malignant)} malignant images\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "30a89bb3",
+   "metadata": {},
+   "outputs": [
+    {
+     "name": "stdout",
+     "output_type": "stream",
+     "text": [
+      "Loaded 30 images\n",
+      "Image shape: (256, 256)\n",
+      "Benign images: 15\n",
+      "Malignant images: 15\n"
+     ]
+    }
+   ],
+   "source": [
+    "\n",
+    "# Function to load and preprocess images\n",
+    "def load_and_preprocess_image(image_path, mask_path, target_size=(256, 256)):\n",
+    "    \"\"\"\n",
+    "    Load image and mask, resize to target size, convert to grayscale, normalize to [0,1]\n",
+    "    \"\"\"\n",
+    "    # Load image\n",
+    "    img = Image.open(image_path).convert('L')  # Convert to grayscale\n",
+    "    img = img.resize(target_size, Image.BILINEAR)\n",
+    "    img = np.array(img, dtype=np.float64) / 255.0\n",
+    "    \n",
+    "    # Load mask\n",
+    "    if os.path.exists(mask_path):\n",
+    "        mask = Image.open(mask_path).convert('L')\n",
+    "        mask = mask.resize(target_size, Image.NEAREST)\n",
+    "        mask = np.array(mask, dtype=bool)\n",
+    "    else:\n",
+    "        # If no mask exists, create an all-zero mask\n",
+    "        mask = np.zeros(target_size, dtype=bool)\n",
+    "    \n",
+    "    return img, mask\n",
+    "\n",
+    "# Load all 30 images and their masks\n",
+    "study_images = []\n",
+    "study_masks = []\n",
+    "study_labels = []\n",
+    "\n",
+    "# Load benign images\n",
+    "for img_name in selected_benign:\n",
+    "    img_path = os.path.join(benign_dir, img_name)\n",
+    "    # Find corresponding mask\n",
+    "    mask_name = img_name.replace('.png', '_mask.png')\n",
+    "    mask_path = os.path.join(benign_dir, mask_name)\n",
+    "    \n",
+    "    img, mask = load_and_preprocess_image(img_path, mask_path)\n",
+    "    study_images.append(img)\n",
+    "    study_masks.append(mask)\n",
+    "    study_labels.append('benign')\n",
+    "\n",
+    "# Load malignant images\n",
+    "for img_name in selected_malignant:\n",
+    "    img_path = os.path.join(malignant_dir, img_name)\n",
+    "    mask_name = img_name.replace('.png', '_mask.png')\n",
+    "    mask_path = os.path.join(malignant_dir, mask_name)\n",
+    "    \n",
+    "    img, mask = load_and_preprocess_image(img_path, mask_path)\n",
+    "    study_images.append(img)\n",
+    "    study_masks.append(mask)\n",
+    "    study_labels.append('malignant')\n",
+    "\n",
+    "print(f\"Loaded {len(study_images)} images\")\n",
+    "print(f\"Image shape: {study_images[0].shape}\")\n",
+    "print(f\"Benign images: {study_labels.count('benign')}\")\n",
+    "print(f\"Malignant images: {study_labels.count('malignant')}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "a104bc64",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "# Generate compressed sensing measurement data at 15% sampling rate\n",
+    "# Using fixed seeds for reproducibility (seed 42 for measurement matrix, seed 43 for noise)\n",
+    "# Optimize by generating measurement matrix once since all images are same size\n",
+    "\n",
+    "def generate_cs_measurements(image, A, seed_noise=43):\n",
+    "    \"\"\"\n",
+    "    Generate compressed sensing measurements with Gaussian noise using pre-generated A matrix\n",
+    "    \n",
+    "    Parameters:\n",
+    "    - image: 2D array, the original image\n",
+    "    - A: measurement matrix\n",
+    "    - seed_noise: random seed for noise generation\n",
+    "    \n",
+    "    Returns:\n",
+    "    - y: measurement vector\n",
+    "    \"\"\"\n",
+    "    # Flatten image and take measurements\n",
+    "    x = image.flatten()\n",
+    "    y_clean = A @ x\n",
+    "    \n",
+    "    # Add Gaussian noise to achieve target SNR (25 dB)\n",
+    "    np.random.seed(seed_noise)\n",
+    "    signal_power = np.mean(y_clean ** 2)\n",
+    "    noise_power = signal_power / (10 ** (25 / 10))\n",
+    "    noise = np.sqrt(noise_power) * np.random.randn(len(y_clean))\n",
+    "    y = y_clean + noise\n",
+    "    \n",
+    "    return y\n",
+    "\n",
+    "# Generate measurement matrix once (all images are 256x256)\n",
+    "print(\"Generating measurement matrix...\")\n",
+    "n = 256 * 256\n",
+    "m = int(n * 0.15)\n",
+    "np.random.seed(42)\n",
+    "A = np.random.randn(m, n) / np.sqrt(m)\n",
+    "print(f\"Measurement matrix shape: {A.shape}\")\n",
+    "\n",
+    "# Generate measurements for all 30 images\n",
+    "measurements_data = []\n",
+    "print(\"Generating compressed sensing measurements at 15% sampling rate with 25dB SNR...\")\n",
+    "for i, img in enumerate(study_images):\n",
+    "    y = generate_cs_measurements(img, A, seed_noise=43+i)\n",
+    "    measurements_data.append({'y': y, 'A': A, 'image': img, 'mask': study_masks[i], 'label': study_labels[i]})\n",
+    "    \n",
+    "print(f\"Generated measurements for {len(measurements_data)} images\")\n",
+    "print(f\"Measurement vector size: {measurements_data[0]['y'].shape}\")\n",
+    "print(f\"Sampling rate: {m / n:.2%}\")\n"
+   ]
+  },
+  {
+   "cell_type": "code",
+   "execution_count": null,
+   "id": "8d63fd3f",
+   "metadata": {},
+   "outputs": [],
+   "source": [
+    "\n",
+    "# Implement Adaptive-HASA reconstruction algorithm with configurable window size\n",
+    "# This combines TV minimization with wavelet thresholding, using adaptive weights\n",
+    "\n",
+    "def calculate_local_gradient_variance(image, window_size):\n",
+    "    \"\"\"Calculate local gradient variance using a sliding window\"\"\"\n",
+    "    # Compute image gradients\n",
+    "    gy, gx = np.gradient(image)\n",
+    "    gradient_mag = np.sqrt(gx**2 + gy**2)\n",
+    "    \n",
+    "    # Calculate local variance of gradient magnitude\n",
+    "    footprint = np.ones((window_size, window_size))\n",
+    "    local_mean = ndimage.convolve(gradient_mag, footprint / footprint.sum(), mode='reflect')\n",
+    "    local_sq_mean = ndimage.convolve(gradient_mag**2, footprint / footprint.sum(), mode='reflect')\n",
+    "    local_var = np.maximum(local_sq_mean - local_mean**2, 0)\n",
+    "    \n",
+    "    return local_var\n",
+    "\n",
+    "def calculate_local_entropy(image, window_size):\n",
+    "    \"\"\"Calculate local entropy using histogram-based approach (optimized)\"\"\"\n",
+    "    from scipy.ndimage import uniform_filter\n",
+    "    \n",
+    "    # Quantize image to reduce computation\n",
+    "    img_quantized = (image * 255).astype(np.uint8)\n",
+    "    \n",
+    "    # Use a faster approximation based on local standard deviation\n",
+    "    # Entropy correlates with local variation\n",
+    "    local_mean = uniform_filter(image, size=window_size, mode='reflect')\n",
+    "    local_sq_mean = uniform_filter(image**2, size=window_size, mode='reflect')\n",
+    "    local_std = np.sqrt(np.maximum(local_sq_mean - local_mean**2, 0))\n",
+    "    \n",
+    "    # Normalize to [0, 1] range as proxy for entropy\n",
+    "    if local_std.max() > 0:\n",
+    "        local_entropy_proxy = local_std / local_std.max()\n",
+    "    else:\n",
+    "        local_entropy_proxy = local_std\n",
+    "    \n",
+    "    return local_entropy_proxy\n",
+    "\n",
+    "print(\"Adaptive-HASA helper functions defined\")\n"
+   ]
+  }
+ ],
+ "metadata": {
+  "kernelspec": {
+   "display_name": "Python 3 (ipykernel)",
+   "language": "python",
+   "name": "python"
+  }
+ },
+ "nbformat": 4,
+ "nbformat_minor": 5
+}

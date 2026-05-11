@@ -1,0 +1,17 @@
+HASA-ADMM-Net Training | HASA_ADMM_ratio8_L6_WA_20260302_234929
+  layers=6, W_mode=A, params=8,382
+  gamma_env=0.1, gamma_constraint=0.01
+
+[Epoch    1/40] Train: 0.006952 (0.55dB) | Val: 0.007233 (0.57dB, init:0.53) NMSE:0.876841 | RF:0.00352 Env:0.03603 Con:0.01135 | LR:0.000998 | 11.7s
+         rho1=0.344 rho2=0.344 eta=0.1406
+[Epoch   10/40] Train: 0.006274 (0.54dB) | Val: 0.006504 (0.55dB, init:0.53) NMSE:0.882764 | RF:0.00354 Env:0.02901 Con:0.00666 | LR:0.000855 | 11.2s
+         rho1=0.468 rho2=0.574 eta=0.2925
+[Epoch   20/40] Train: 0.006086 (0.71dB) | Val: 0.006308 (0.71dB, init:0.53) NMSE:0.851596 | RF:0.00341 Env:0.02893 Con:0.00052 | LR:0.000505 | 11.4s
+         rho1=0.627 rho2=0.631 eta=0.5067
+[Epoch   30/40] Train: 0.006059 (0.79dB) | Val: 0.006314 (0.76dB, init:0.53) NMSE:0.840689 | RF:0.00337 Env:0.02916 Con:0.00333 | LR:0.000155 | 11.2s
+         rho1=0.753 rho2=0.382 eta=0.5457
+[Epoch   40/40] Train: 0.006055 (0.80dB) | Val: 0.006321 (0.77dB, init:0.53) NMSE:0.839431 | RF:0.00336 Env:0.02920 Con:0.00421 | LR:0.000010 | 12.0s
+         rho1=0.767 rho2=0.353 eta=0.5256
+
+最佳验证 SNR: 0.77 dB @ Epoch 37
+模型保存至: model/HASA_ADMM_ratio8_L6_WA_20260302_234929

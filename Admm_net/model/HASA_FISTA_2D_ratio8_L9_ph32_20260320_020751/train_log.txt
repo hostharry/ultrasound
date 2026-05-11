@@ -1,0 +1,27 @@
+hasa_fista_2d 2D Training | HASA_FISTA_2D_ratio8_L9_ph32_20260320_020751
+  layers=9, params=1,410,984
+  fista_feat_ch=64, fista_prox_k=3
+  hasa: hidden=16, layers=2, kernel=5
+  patch_h=32
+  datasets=1, train=147, val=28
+
+[Epoch    1/300] Train: 0.003605 (0.29dB) | Val: 0.003314 (0.79dB, init:0.54) NMSE:0.834921 | RF:0.00109 Env:0.02220 Con:0.00000 | LR:0.000500 | 19.4s
+         rho1=0.982 rho2=0.982 eta=0.6989 gamma=0.000
+[Epoch    5/300] Train: 0.002765 (1.35dB) | Val: 0.002739 (1.49dB, init:0.54) NMSE:0.718179 | RF:0.00092 Env:0.01824 Con:0.00000 | LR:0.000500 | 16.5s
+         rho1=0.985 rho2=0.985 eta=0.7021 gamma=0.000
+[Epoch   10/300] Train: 0.002699 (1.39dB) | Val: 0.002688 (1.39dB, init:0.54) NMSE:0.735835 | RF:0.00093 Env:0.01755 Con:0.00000 | LR:0.000499 | 15.0s
+         rho1=0.988 rho2=0.988 eta=0.7005 gamma=0.000
+[Epoch   15/300] Train: 0.002643 (1.46dB) | Val: 0.002644 (1.58dB, init:0.54) NMSE:0.705067 | RF:0.00089 Env:0.01749 Con:0.00000 | LR:0.000497 | 16.4s
+         rho1=0.991 rho2=0.991 eta=0.7001 gamma=0.000
+[Epoch   20/300] Train: 0.002626 (1.47dB) | Val: 0.002607 (1.62dB, init:0.54) NMSE:0.700553 | RF:0.00089 Env:0.01721 Con:0.00000 | LR:0.000495 | 16.4s
+         rho1=0.994 rho2=0.994 eta=0.7009 gamma=0.000
+[Epoch   25/300] Train: 0.002611 (1.49dB) | Val: 0.002597 (1.60dB, init:0.54) NMSE:0.703874 | RF:0.00089 Env:0.01708 Con:0.00000 | LR:0.000492 | 16.4s
+         rho1=0.997 rho2=0.997 eta=0.7031 gamma=0.000
+[Epoch   30/300] Train: 0.002604 (1.49dB) | Val: 0.002588 (1.60dB, init:0.54) NMSE:0.702688 | RF:0.00089 Env:0.01700 Con:0.00000 | LR:0.000488 | 15.7s
+         rho1=1.000 rho2=1.000 eta=0.7062 gamma=0.000
+[Epoch   35/300] Train: 0.002597 (1.50dB) | Val: 0.002598 (1.69dB, init:0.54) NMSE:0.689483 | RF:0.00087 Env:0.01727 Con:0.00000 | LR:0.000484 | 15.6s
+         rho1=1.005 rho2=1.005 eta=0.7096 gamma=0.000
+[Epoch   40/300] Train: 0.002599 (1.50dB) | Val: 0.002584 (1.64dB, init:0.54) NMSE:0.698086 | RF:0.00088 Env:0.01703 Con:0.00000 | LR:0.000479 | 16.3s
+         rho1=1.009 rho2=1.009 eta=0.7129 gamma=0.000
+[Epoch   45/300] Train: 0.002589 (1.50dB) | Val: 0.002586 (1.57dB, init:0.54) NMSE:0.707682 | RF:0.00090 Env:0.01690 Con:0.00000 | LR:0.000473 | 15.2s
+         rho1=1.015 rho2=1.015 eta=0.7157 gamma=0.000

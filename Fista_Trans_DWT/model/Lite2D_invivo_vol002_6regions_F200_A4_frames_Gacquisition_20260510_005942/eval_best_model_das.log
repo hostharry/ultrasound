@@ -1,0 +1,862 @@
+/root/autodl-tmp/毕业设计/Ultrasound/Fista_Trans_DWT/../Utils/evaluate_common.py:1141: UserWarning: This figure includes Axes that are not compatible with tight_layout, so results might be incorrect.
+  plt.tight_layout()
+Config: {'npz': "['../data_epfl/invivo_vol002_6regions_F200_A4_frames_Gacquisition.npz']", 'cs_ratio': 8, 'val_ratio': 0.15, 'split_mode': 'group', 'seed': 42, 'layers': 4, 'gamma_env': 0.1, 'loss_mode': 'slae', 'depth_weight': 'exp', 'depth_weight_alpha': 3.0, 'gamma_msle': 0.0, 'gamma_kld': 0.1, 'alpha_db': -60.0, 'kld_bins': 40, 'kld_eta': 0.5, 'kld_low_db': -60.0, 'kld_high_db': 0.0, 'gamma_grad': 0.0, 'gamma_stat': 0.0, 'stat_var_weight': 0.5, 'stat_win': 7, 'gamma_das': 0.1, 'das_loss_mode': 'kld_mslae', 'das_alpha_db': -60.0, 'das_beta_kld': 0.5, 'das_kld_bins': 40, 'das_kld_eta': 0.5, 'das_kld_low_db': -40.0, 'das_kld_high_db': 40.0, 'das_chunk_size': 10000, 'das_checkpoint': True, 'settings_dir': 'None', 'epochs': 300, 'batch_size': 8, 'val_batch_size': 'None', 'lr': 0.0005, 'weight_decay': 1e-05, 'warm_restarts': 0, 'grad_clip': 1.0, 'amp': False, 'compile': False, 'gpu': 0, 'save_dir': 'model', 'resume': 'None', 'log_interval': 5, 'save_interval': 50, 'd_model': 32, 'num_conv_blocks': 2, 'conv_ks': 5, 'dwt_levels': 1, 'prox_tau': 0.005, 'hasa_type': 'conv', 'hasa_base_ch': 16, 'hasa_hidden': 16, 'num_hasa_layers': 2, 'hasa_kernel': 5, 'hasa_context_ks': 3, 'hasa_context_dilation': 3, 'patch_h': 999, 'patch_stride': 16}
+Loaded checkpoint: model/Lite2D_invivo_vol002_6regions_F200_A4_frames_Gacquisition_20260510_005942/best_model.pth (epoch 26)
+Model: FISTA-DWT-Lite-2D, params=4,184,704
+  [DAS] 训练用 patch_h=999, 但 DAS 需要完整帧 → 强制 patch_h=None
+  Training curves saved
+
+加载数据: ../data_epfl/invivo_vol002_6regions_F200_A4_frames_Gacquisition.npz
+  Dataset [0]: N=2133, H_full=192, n_frames=4400, samples=4400, unit=frame
+  Frame 0: SNR=11.11 dB, PSNR=35.15 dB, SSIM=0.8645 (init=0.74), NMSE=0.0775
+  Frame 1099: SNR=5.34 dB, PSNR=35.40 dB, SSIM=0.8827 (init=0.69), NMSE=0.2922
+  Frame 2199: SNR=5.53 dB, PSNR=38.26 dB, SSIM=0.9059 (init=0.70), NMSE=0.2798
+  Frame 3299: SNR=7.67 dB, PSNR=36.22 dB, SSIM=0.9182 (init=0.70), NMSE=0.1712
+  Frame 4399: SNR=8.21 dB, PSNR=38.10 dB, SSIM=0.9442 (init=0.70), NMSE=0.1512
+  eval_frames_ds0.npz saved ((4400, 192, 2133))
+
+  === Acquisition 0 ===
+    Recon DAS ...
+    PSNR=16.82 dB  SSIM=0.2498  SNR=12.91 dB  CR_gt=-4.49 dB  CR_pred=0.25 dB  CNR_gt=0.266  CNR_pred=0.038
+    Speckle SNR  gt=2.290  pred=1.783
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.3s)
+
+  === Acquisition 1 ===
+    Recon DAS ...
+    PSNR=16.51 dB  SSIM=0.2763  SNR=11.89 dB  CR_gt=-3.87 dB  CR_pred=2.53 dB  CNR_gt=0.534  CNR_pred=0.348
+    Speckle SNR  gt=2.234  pred=1.813
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 2 ===
+    Recon DAS ...
+    PSNR=16.79 dB  SSIM=0.2477  SNR=11.98 dB  CR_gt=-10.63 dB  CR_pred=-4.43 dB  CNR_gt=0.765  CNR_pred=0.620
+    Speckle SNR  gt=2.357  pred=1.928
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.0s)
+
+  === Acquisition 3 ===
+    Recon DAS ...
+    PSNR=16.93 dB  SSIM=0.2332  SNR=12.30 dB  CR_gt=-2.95 dB  CR_pred=2.65 dB  CNR_gt=0.433  CNR_pred=0.452
+    Speckle SNR  gt=2.210  pred=2.045
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 4 ===
+    Recon DAS ...
+    PSNR=16.43 dB  SSIM=0.2379  SNR=11.02 dB  CR_gt=-5.49 dB  CR_pred=-0.62 dB  CNR_gt=0.479  CNR_pred=0.093
+    Speckle SNR  gt=2.482  pred=1.619
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.0s)
+
+  === Acquisition 5 ===
+    Recon DAS ...
+    PSNR=16.64 dB  SSIM=0.2653  SNR=12.02 dB  CR_gt=-15.06 dB  CR_pred=-13.12 dB  CNR_gt=0.662  CNR_pred=0.611
+    Speckle SNR  gt=2.208  pred=1.696
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 6 ===
+    Recon DAS ...
+    PSNR=16.51 dB  SSIM=0.2582  SNR=12.13 dB  CR_gt=-4.24 dB  CR_pred=-0.98 dB  CNR_gt=0.584  CNR_pred=0.141
+    Speckle SNR  gt=2.229  pred=2.026
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 7 ===
+    Recon DAS ...
+    PSNR=17.21 dB  SSIM=0.1981  SNR=12.85 dB  CR_gt=-16.78 dB  CR_pred=-16.59 dB  CNR_gt=0.912  CNR_pred=0.856
+    Speckle SNR  gt=2.225  pred=2.066
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 8 ===
+    Recon DAS ...
+    PSNR=16.47 dB  SSIM=0.2685  SNR=11.93 dB  CR_gt=-14.56 dB  CR_pred=-16.20 dB  CNR_gt=0.928  CNR_pred=0.733
+    Speckle SNR  gt=2.354  pred=1.925
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.0s)
+
+  === Acquisition 9 ===
+    Recon DAS ...
+    PSNR=16.75 dB  SSIM=0.2892  SNR=12.11 dB  CR_gt=-10.93 dB  CR_pred=-8.72 dB  CNR_gt=0.617  CNR_pred=0.616
+    Speckle SNR  gt=2.379  pred=1.773
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.0s)
+
+  === Acquisition 10 ===
+    Recon DAS ...
+    PSNR=17.22 dB  SSIM=0.2929  SNR=13.74 dB  CR_gt=-2.70 dB  CR_pred=-0.03 dB  CNR_gt=0.311  CNR_pred=0.004
+    Speckle SNR  gt=2.264  pred=1.898
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 11 ===
+    Recon DAS ...
+    PSNR=14.77 dB  SSIM=0.2228  SNR=8.67 dB  CR_gt=-2.25 dB  CR_pred=-1.58 dB  CNR_gt=0.308  CNR_pred=0.233
+    Speckle SNR  gt=2.061  pred=1.892
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (14.1s)
+
+  === Acquisition 12 ===
+    Recon DAS ...
+    PSNR=16.69 dB  SSIM=0.2937  SNR=13.41 dB  CR_gt=-12.32 dB  CR_pred=-13.11 dB  CNR_gt=0.779  CNR_pred=0.812
+    Speckle SNR  gt=2.241  pred=1.902
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.0s)
+
+  === Acquisition 13 ===
+    Recon DAS ...
+    PSNR=16.44 dB  SSIM=0.2376  SNR=11.79 dB  CR_gt=-6.92 dB  CR_pred=-2.08 dB  CNR_gt=0.846  CNR_pred=0.319
+    Speckle SNR  gt=2.435  pred=2.061
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (14.1s)
+
+  === Acquisition 14 ===
+    Recon DAS ...
+    PSNR=17.74 dB  SSIM=0.2476  SNR=13.60 dB  CR_gt=-5.04 dB  CR_pred=1.43 dB  CNR_gt=0.568  CNR_pred=0.188
+    Speckle SNR  gt=2.291  pred=1.999
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 15 ===
+    Recon DAS ...
+    PSNR=16.73 dB  SSIM=0.2678  SNR=13.07 dB  CR_gt=-4.90 dB  CR_pred=0.34 dB  CNR_gt=0.541  CNR_pred=0.047
+    Speckle SNR  gt=2.280  pred=1.835
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 16 ===
+    Recon DAS ...
+    PSNR=16.66 dB  SSIM=0.2515  SNR=12.84 dB  CR_gt=-1.08 dB  CR_pred=-3.74 dB  CNR_gt=0.146  CNR_pred=0.486
+    Speckle SNR  gt=2.382  pred=1.560
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.0s)
+
+  === Acquisition 17 ===
+    Recon DAS ...
+    PSNR=17.20 dB  SSIM=0.2884  SNR=14.18 dB  CR_gt=-11.04 dB  CR_pred=-12.79 dB  CNR_gt=0.694  CNR_pred=0.699
+    Speckle SNR  gt=2.276  pred=1.767
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 18 ===
+    Recon DAS ...
+    PSNR=16.45 dB  SSIM=0.2641  SNR=11.97 dB  CR_gt=-12.93 dB  CR_pred=-13.22 dB  CNR_gt=0.644  CNR_pred=0.631
+    Speckle SNR  gt=2.467  pred=1.878
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (14.1s)
+
+  === Acquisition 19 ===
+    Recon DAS ...
+    PSNR=15.45 dB  SSIM=0.2191  SNR=10.50 dB  CR_gt=-7.06 dB  CR_pred=-0.48 dB  CNR_gt=0.796  CNR_pred=0.069
+    Speckle SNR  gt=2.292  pred=1.763
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (14.1s)
+
+  === Acquisition 20 ===
+    Recon DAS ...
+    PSNR=16.42 dB  SSIM=0.2666  SNR=11.90 dB  CR_gt=-10.20 dB  CR_pred=-6.27 dB  CNR_gt=0.467  CNR_pred=0.505
+    Speckle SNR  gt=2.138  pred=1.573
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.0s)
+
+  === Acquisition 21 ===
+    Recon DAS ...
+    PSNR=16.38 dB  SSIM=0.2376  SNR=11.43 dB  CR_gt=-13.44 dB  CR_pred=-16.24 dB  CNR_gt=0.661  CNR_pred=0.656
+    Speckle SNR  gt=2.175  pred=2.001
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 22 ===
+    Recon DAS ...
+    PSNR=16.19 dB  SSIM=0.2279  SNR=11.51 dB  CR_gt=-9.28 dB  CR_pred=-5.75 dB  CNR_gt=0.637  CNR_pred=0.513
+    Speckle SNR  gt=2.177  pred=1.867
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 23 ===
+    Recon DAS ...
+    PSNR=16.30 dB  SSIM=0.3117  SNR=12.27 dB  CR_gt=-2.70 dB  CR_pred=-0.11 dB  CNR_gt=0.376  CNR_pred=0.017
+    Speckle SNR  gt=2.175  pred=1.709
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 24 ===
+    Recon DAS ...
+    PSNR=17.21 dB  SSIM=0.2827  SNR=13.95 dB  CR_gt=-2.74 dB  CR_pred=-0.30 dB  CNR_gt=0.358  CNR_pred=0.044
+    Speckle SNR  gt=2.391  pred=1.941
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 25 ===
+    Recon DAS ...
+    PSNR=15.80 dB  SSIM=0.2230  SNR=10.05 dB  CR_gt=-15.29 dB  CR_pred=-15.69 dB  CNR_gt=0.896  CNR_pred=0.787
+    Speckle SNR  gt=2.217  pred=2.028
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 26 ===
+    Recon DAS ...
+    PSNR=16.54 dB  SSIM=0.2532  SNR=12.64 dB  CR_gt=-5.59 dB  CR_pred=2.23 dB  CNR_gt=0.548  CNR_pred=0.312
+    Speckle SNR  gt=2.294  pred=1.970
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (14.2s)
+
+  === Acquisition 27 ===
+    Recon DAS ...
+    PSNR=16.97 dB  SSIM=0.2560  SNR=12.51 dB  CR_gt=-1.55 dB  CR_pred=-0.73 dB  CNR_gt=0.212  CNR_pred=0.109
+    Speckle SNR  gt=2.153  pred=1.811
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.0s)
+
+  === Acquisition 28 ===
+    Recon DAS ...
+    PSNR=16.03 dB  SSIM=0.2425  SNR=11.91 dB  CR_gt=-11.50 dB  CR_pred=-1.39 dB  CNR_gt=0.644  CNR_pred=0.219
+    Speckle SNR  gt=2.244  pred=1.792
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (14.1s)
+
+  === Acquisition 29 ===
+    Recon DAS ...
+    PSNR=16.30 dB  SSIM=0.2865  SNR=12.39 dB  CR_gt=-0.91 dB  CR_pred=2.39 dB  CNR_gt=0.134  CNR_pred=0.364
+    Speckle SNR  gt=2.049  pred=2.226
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (14.2s)
+
+  === Acquisition 30 ===
+    Recon DAS ...
+    PSNR=17.41 dB  SSIM=0.3009  SNR=14.35 dB  CR_gt=-0.87 dB  CR_pred=0.85 dB  CNR_gt=0.123  CNR_pred=0.154
+    Speckle SNR  gt=2.363  pred=2.097
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 31 ===
+    Recon DAS ...
+    PSNR=17.66 dB  SSIM=0.2577  SNR=14.27 dB  CR_gt=-3.57 dB  CR_pred=-1.47 dB  CNR_gt=0.498  CNR_pred=0.208
+    Speckle SNR  gt=2.255  pred=2.053
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 32 ===
+    Recon DAS ...
+    PSNR=17.50 dB  SSIM=0.2565  SNR=13.68 dB  CR_gt=-1.37 dB  CR_pred=-2.52 dB  CNR_gt=0.202  CNR_pred=0.362
+    Speckle SNR  gt=2.319  pred=2.080
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 33 ===
+    Recon DAS ...
+    PSNR=16.48 dB  SSIM=0.2473  SNR=12.65 dB  CR_gt=-1.48 dB  CR_pred=-0.66 dB  CNR_gt=0.235  CNR_pred=0.109
+    Speckle SNR  gt=2.190  pred=1.754
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 34 ===
+    Recon DAS ...
+    PSNR=16.47 dB  SSIM=0.2779  SNR=12.38 dB  CR_gt=-8.50 dB  CR_pred=-5.11 dB  CNR_gt=0.447  CNR_pred=0.331
+    Speckle SNR  gt=2.262  pred=2.062
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (13.9s)
+
+  === Acquisition 35 ===
+    Recon DAS ...
+    PSNR=17.23 dB  SSIM=0.2574  SNR=13.41 dB  CR_gt=-1.11 dB  CR_pred=1.38 dB  CNR_gt=0.159  CNR_pred=0.278
+    Speckle SNR  gt=2.406  pred=2.056
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (14.2s)
+
+  === Acquisition 36 ===
+    Recon DAS ...
+    PSNR=16.40 dB  SSIM=0.2229  SNR=11.01 dB  CR_gt=-3.49 dB  CR_pred=-1.11 dB  CNR_gt=0.481  CNR_pred=0.150
+    Speckle SNR  gt=2.054  pred=2.110
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 37 ===
+    Recon DAS ...
+    PSNR=17.04 dB  SSIM=0.2780  SNR=14.13 dB  CR_gt=-2.95 dB  CR_pred=-0.96 dB  CNR_gt=0.350  CNR_pred=0.115
+    Speckle SNR  gt=2.488  pred=1.885
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.3s)
+
+  === Acquisition 38 ===
+    Recon DAS ...
+    PSNR=17.45 dB  SSIM=0.3009  SNR=14.11 dB  CR_gt=-2.67 dB  CR_pred=2.44 dB  CNR_gt=0.245  CNR_pred=0.558
+    Speckle SNR  gt=2.246  pred=2.688
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 39 ===
+    Recon DAS ...
+    PSNR=17.59 dB  SSIM=0.3074  SNR=13.35 dB  CR_gt=-0.80 dB  CR_pred=2.20 dB  CNR_gt=0.126  CNR_pred=0.423
+    Speckle SNR  gt=2.287  pred=1.676
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (14.1s)
+
+  === Acquisition 40 ===
+    Recon DAS ...
+    PSNR=17.72 dB  SSIM=0.2442  SNR=14.57 dB  CR_gt=-1.08 dB  CR_pred=0.11 dB  CNR_gt=0.169  CNR_pred=0.045
+    Speckle SNR  gt=2.286  pred=3.672
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (14.2s)
+
+  === Acquisition 41 ===
+    Recon DAS ...
+    PSNR=16.55 dB  SSIM=0.3122  SNR=12.58 dB  CR_gt=-1.19 dB  CR_pred=1.49 dB  CNR_gt=0.165  CNR_pred=0.209
+    Speckle SNR  gt=1.981  pred=1.994
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 42 ===
+    Recon DAS ...
+    PSNR=16.62 dB  SSIM=0.2623  SNR=12.78 dB  CR_gt=-3.81 dB  CR_pred=0.08 dB  CNR_gt=0.553  CNR_pred=0.012
+    Speckle SNR  gt=2.668  pred=2.076
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 43 ===
+    Recon DAS ...
+    PSNR=16.55 dB  SSIM=0.2612  SNR=12.29 dB  CR_gt=-13.01 dB  CR_pred=-14.31 dB  CNR_gt=0.670  CNR_pred=0.657
+    Speckle SNR  gt=2.405  pred=1.650
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (14.2s)
+
+  === Acquisition 44 ===
+    Recon DAS ...
+    PSNR=17.52 dB  SSIM=0.3065  SNR=13.33 dB  CR_gt=-2.91 dB  CR_pred=0.09 dB  CNR_gt=0.443  CNR_pred=0.015
+    Speckle SNR  gt=2.203  pred=1.974
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (42.7s)
+
+  === Acquisition 45 ===
+    Recon DAS ...
+    PSNR=16.98 dB  SSIM=0.2842  SNR=12.70 dB  CR_gt=-4.88 dB  CR_pred=-2.12 dB  CNR_gt=0.548  CNR_pred=0.307
+    Speckle SNR  gt=2.088  pred=1.850
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (42.8s)
+
+  === Acquisition 46 ===
+    Recon DAS ...
+    PSNR=19.61 dB  SSIM=0.4389  SNR=17.30 dB  CR_gt=-6.06 dB  CR_pred=-2.52 dB  CNR_gt=0.892  CNR_pred=0.510
+    Speckle SNR  gt=3.420  pred=2.836
+    ACF FWHM ax  gt=2.365 mm  pred=1.183 mm
+    ACF FWHM lat gt=1.380 mm  pred=1.840 mm
+    (42.7s)
+
+  === Acquisition 47 ===
+    Recon DAS ...
+    PSNR=17.88 dB  SSIM=0.3060  SNR=13.89 dB  CR_gt=-2.07 dB  CR_pred=1.66 dB  CNR_gt=0.310  CNR_pred=0.442
+    Speckle SNR  gt=2.318  pred=2.063
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (42.8s)
+
+  === Acquisition 48 ===
+    Recon DAS ...
+    PSNR=18.37 dB  SSIM=0.2997  SNR=14.82 dB  CR_gt=-3.42 dB  CR_pred=-2.37 dB  CNR_gt=0.469  CNR_pred=0.347
+    Speckle SNR  gt=2.366  pred=2.566
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (44.4s)
+
+  === Acquisition 49 ===
+    Recon DAS ...
+    PSNR=17.30 dB  SSIM=0.2754  SNR=12.82 dB  CR_gt=-0.62 dB  CR_pred=2.45 dB  CNR_gt=0.090  CNR_pred=0.480
+    Speckle SNR  gt=2.329  pred=1.969
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (42.6s)
+
+  === Acquisition 50 ===
+    Recon DAS ...
+    PSNR=17.08 dB  SSIM=0.2738  SNR=13.29 dB  CR_gt=-1.37 dB  CR_pred=1.84 dB  CNR_gt=0.207  CNR_pred=0.308
+    Speckle SNR  gt=2.276  pred=1.941
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (42.9s)
+
+  === Acquisition 51 ===
+    Recon DAS ...
+    PSNR=16.50 dB  SSIM=0.2901  SNR=12.50 dB  CR_gt=-1.46 dB  CR_pred=2.26 dB  CNR_gt=0.179  CNR_pred=0.425
+    Speckle SNR  gt=2.134  pred=1.878
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.0s)
+
+  === Acquisition 52 ===
+    Recon DAS ...
+    PSNR=17.79 dB  SSIM=0.3341  SNR=13.60 dB  CR_gt=-11.61 dB  CR_pred=-9.01 dB  CNR_gt=0.367  CNR_pred=0.378
+    Speckle SNR  gt=2.276  pred=2.419
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (42.9s)
+
+  === Acquisition 53 ===
+    Recon DAS ...
+    PSNR=16.73 dB  SSIM=0.2937  SNR=12.56 dB  CR_gt=-1.71 dB  CR_pred=1.63 dB  CNR_gt=0.227  CNR_pred=0.233
+    Speckle SNR  gt=2.199  pred=1.812
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.0s)
+
+  === Acquisition 54 ===
+    Recon DAS ...
+    PSNR=16.75 dB  SSIM=0.2531  SNR=12.32 dB  CR_gt=-2.38 dB  CR_pred=-0.81 dB  CNR_gt=0.323  CNR_pred=0.121
+    Speckle SNR  gt=2.044  pred=2.056
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (42.9s)
+
+  === Acquisition 55 ===
+    Recon DAS ...
+    PSNR=16.89 dB  SSIM=0.2799  SNR=12.84 dB  CR_gt=-0.93 dB  CR_pred=1.54 dB  CNR_gt=0.125  CNR_pred=0.285
+    Speckle SNR  gt=2.369  pred=2.042
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (42.7s)
+
+  === Acquisition 56 ===
+    Recon DAS ...
+    PSNR=15.87 dB  SSIM=0.2496  SNR=11.63 dB  CR_gt=-12.27 dB  CR_pred=-2.76 dB  CNR_gt=0.569  CNR_pred=0.343
+    Speckle SNR  gt=2.275  pred=1.876
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (42.7s)
+
+  === Acquisition 57 ===
+    Recon DAS ...
+    PSNR=16.28 dB  SSIM=0.2950  SNR=12.04 dB  CR_gt=-2.84 dB  CR_pred=1.39 dB  CNR_gt=0.399  CNR_pred=0.209
+    Speckle SNR  gt=2.166  pred=1.952
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (42.7s)
+
+  === Acquisition 58 ===
+    Recon DAS ...
+    PSNR=16.92 dB  SSIM=0.3198  SNR=12.73 dB  CR_gt=-11.91 dB  CR_pred=-6.57 dB  CNR_gt=0.646  CNR_pred=0.556
+    Speckle SNR  gt=2.322  pred=2.025
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (42.9s)
+
+  === Acquisition 59 ===
+    Recon DAS ...
+    PSNR=17.91 dB  SSIM=0.3164  SNR=14.08 dB  CR_gt=-2.23 dB  CR_pred=1.35 dB  CNR_gt=0.333  CNR_pred=0.285
+    Speckle SNR  gt=2.259  pred=1.935
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.0s)
+
+  === Acquisition 60 ===
+    Recon DAS ...
+    PSNR=16.91 dB  SSIM=0.2806  SNR=13.01 dB  CR_gt=-7.64 dB  CR_pred=0.62 dB  CNR_gt=0.618  CNR_pred=0.091
+    Speckle SNR  gt=2.080  pred=1.804
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.1s)
+
+  === Acquisition 61 ===
+    Recon DAS ...
+    PSNR=17.93 dB  SSIM=0.2910  SNR=14.29 dB  CR_gt=-1.35 dB  CR_pred=1.88 dB  CNR_gt=0.213  CNR_pred=0.580
+    Speckle SNR  gt=2.229  pred=4.368
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.0s)
+
+  === Acquisition 62 ===
+    Recon DAS ...
+    PSNR=17.32 dB  SSIM=0.2723  SNR=13.45 dB  CR_gt=-3.24 dB  CR_pred=0.87 dB  CNR_gt=0.430  CNR_pred=0.152
+    Speckle SNR  gt=2.338  pred=1.931
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.1s)
+
+  === Acquisition 63 ===
+    Recon DAS ...
+    PSNR=16.95 dB  SSIM=0.2341  SNR=12.50 dB  CR_gt=-6.59 dB  CR_pred=2.69 dB  CNR_gt=0.528  CNR_pred=0.623
+    Speckle SNR  gt=2.203  pred=4.309
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (42.8s)
+
+  === Acquisition 64 ===
+    Recon DAS ...
+    PSNR=16.56 dB  SSIM=0.2861  SNR=11.77 dB  CR_gt=-15.41 dB  CR_pred=-5.79 dB  CNR_gt=0.720  CNR_pred=0.503
+    Speckle SNR  gt=2.219  pred=1.724
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (42.8s)
+
+  === Acquisition 65 ===
+    Recon DAS ...
+    PSNR=17.60 dB  SSIM=0.2852  SNR=13.82 dB  CR_gt=-2.58 dB  CR_pred=-0.48 dB  CNR_gt=0.384  CNR_pred=0.074
+    Speckle SNR  gt=2.342  pred=1.888
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.920 mm
+    (42.8s)
+
+  === Acquisition 66 ===
+    Recon DAS ...
+    PSNR=16.63 dB  SSIM=0.2976  SNR=13.31 dB  CR_gt=-3.91 dB  CR_pred=1.28 dB  CNR_gt=0.463  CNR_pred=0.582
+    Speckle SNR  gt=2.433  pred=4.743
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.0s)
+
+  === Acquisition 67 ===
+    Recon DAS ...
+    PSNR=17.89 dB  SSIM=0.3131  SNR=14.15 dB  CR_gt=-0.79 dB  CR_pred=3.25 dB  CNR_gt=0.120  CNR_pred=0.623
+    Speckle SNR  gt=2.262  pred=2.702
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (42.9s)
+
+  === Acquisition 68 ===
+    Recon DAS ...
+    PSNR=17.91 dB  SSIM=0.2761  SNR=14.83 dB  CR_gt=-3.15 dB  CR_pred=1.23 dB  CNR_gt=0.423  CNR_pred=0.268
+    Speckle SNR  gt=2.443  pred=3.482
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (42.9s)
+
+  === Acquisition 69 ===
+    Recon DAS ...
+    PSNR=16.88 dB  SSIM=0.2540  SNR=13.63 dB  CR_gt=-5.11 dB  CR_pred=-1.72 dB  CNR_gt=0.545  CNR_pred=0.266
+    Speckle SNR  gt=2.545  pred=2.410
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.1s)
+
+  === Acquisition 70 ===
+    Recon DAS ...
+    PSNR=17.05 dB  SSIM=0.2916  SNR=13.14 dB  CR_gt=-8.08 dB  CR_pred=-3.49 dB  CNR_gt=0.594  CNR_pred=0.483
+    Speckle SNR  gt=2.433  pred=2.071
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (42.8s)
+
+  === Acquisition 71 ===
+    Recon DAS ...
+    PSNR=17.73 dB  SSIM=0.2766  SNR=13.98 dB  CR_gt=-2.43 dB  CR_pred=-1.24 dB  CNR_gt=0.326  CNR_pred=0.240
+    Speckle SNR  gt=2.264  pred=1.928
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (42.9s)
+
+  === Acquisition 72 ===
+    Recon DAS ...
+    PSNR=16.63 dB  SSIM=0.3188  SNR=13.03 dB  CR_gt=-5.49 dB  CR_pred=-0.85 dB  CNR_gt=0.502  CNR_pred=0.137
+    Speckle SNR  gt=2.177  pred=1.970
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (42.7s)
+
+  === Acquisition 73 ===
+    Recon DAS ...
+    PSNR=18.02 dB  SSIM=0.3702  SNR=15.21 dB  CR_gt=-3.19 dB  CR_pred=-1.40 dB  CNR_gt=0.374  CNR_pred=0.277
+    Speckle SNR  gt=2.271  pred=2.644
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.1s)
+
+  === Acquisition 74 ===
+    Recon DAS ...
+    PSNR=17.89 dB  SSIM=0.4000  SNR=15.03 dB  CR_gt=-2.79 dB  CR_pred=2.19 dB  CNR_gt=0.301  CNR_pred=0.406
+    Speckle SNR  gt=2.377  pred=5.164
+    ACF FWHM ax  gt=0.000 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (42.9s)
+
+  === Acquisition 75 ===
+    Recon DAS ...
+    PSNR=19.49 dB  SSIM=0.4676  SNR=17.32 dB  CR_gt=-4.39 dB  CR_pred=0.30 dB  CNR_gt=0.425  CNR_pred=0.068
+    Speckle SNR  gt=2.048  pred=5.774
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.3s)
+
+  === Acquisition 76 ===
+    Recon DAS ...
+    PSNR=17.93 dB  SSIM=0.3530  SNR=14.47 dB  CR_gt=-6.19 dB  CR_pred=-1.81 dB  CNR_gt=0.557  CNR_pred=0.268
+    Speckle SNR  gt=2.235  pred=1.829
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.4s)
+
+  === Acquisition 77 ===
+    Recon DAS ...
+    PSNR=16.85 dB  SSIM=0.3002  SNR=12.59 dB  CR_gt=-11.46 dB  CR_pred=-7.20 dB  CNR_gt=0.647  CNR_pred=0.670
+    Speckle SNR  gt=2.362  pred=2.020
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.5s)
+
+  === Acquisition 78 ===
+    Recon DAS ...
+    PSNR=17.46 dB  SSIM=0.3327  SNR=13.79 dB  CR_gt=-1.80 dB  CR_pred=-1.22 dB  CNR_gt=0.245  CNR_pred=0.179
+    Speckle SNR  gt=2.242  pred=1.878
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.3s)
+
+  === Acquisition 79 ===
+    Recon DAS ...
+    PSNR=17.23 dB  SSIM=0.3293  SNR=14.19 dB  CR_gt=-10.56 dB  CR_pred=-6.59 dB  CNR_gt=0.676  CNR_pred=0.481
+    Speckle SNR  gt=2.205  pred=3.602
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.5s)
+
+  === Acquisition 80 ===
+    Recon DAS ...
+    PSNR=18.26 dB  SSIM=0.3992  SNR=15.39 dB  CR_gt=-7.65 dB  CR_pred=-2.55 dB  CNR_gt=0.774  CNR_pred=0.377
+    Speckle SNR  gt=2.293  pred=1.976
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.3s)
+
+  === Acquisition 81 ===
+    Recon DAS ...
+    PSNR=17.82 dB  SSIM=0.3940  SNR=14.98 dB  CR_gt=-9.86 dB  CR_pred=-10.14 dB  CNR_gt=0.552  CNR_pred=0.697
+    Speckle SNR  gt=2.341  pred=1.738
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.5s)
+
+  === Acquisition 82 ===
+    Recon DAS ...
+    PSNR=18.32 dB  SSIM=0.4300  SNR=15.67 dB  CR_gt=-11.82 dB  CR_pred=-6.53 dB  CNR_gt=0.731  CNR_pred=0.551
+    Speckle SNR  gt=2.672  pred=2.551
+    ACF FWHM ax  gt=0.296 mm  pred=1.183 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.5s)
+
+  === Acquisition 83 ===
+    Recon DAS ...
+    PSNR=16.34 dB  SSIM=0.2812  SNR=13.28 dB  CR_gt=-6.07 dB  CR_pred=-3.47 dB  CNR_gt=0.534  CNR_pred=0.445
+    Speckle SNR  gt=2.568  pred=2.176
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (43.6s)
+
+  === Acquisition 84 ===
+    Recon DAS ...
+    PSNR=18.31 dB  SSIM=0.3710  SNR=14.93 dB  CR_gt=-1.49 dB  CR_pred=0.95 dB  CNR_gt=0.222  CNR_pred=0.238
+    Speckle SNR  gt=2.313  pred=2.659
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.5s)
+
+  === Acquisition 85 ===
+    Recon DAS ...
+    PSNR=17.55 dB  SSIM=0.3052  SNR=13.93 dB  CR_gt=-2.98 dB  CR_pred=1.71 dB  CNR_gt=0.420  CNR_pred=0.313
+    Speckle SNR  gt=2.111  pred=1.920
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.4s)
+
+  === Acquisition 86 ===
+    Recon DAS ...
+    PSNR=17.76 dB  SSIM=0.3834  SNR=14.78 dB  CR_gt=-4.38 dB  CR_pred=-0.02 dB  CNR_gt=0.648  CNR_pred=0.004
+    Speckle SNR  gt=2.443  pred=3.114
+    ACF FWHM ax  gt=0.591 mm  pred=1.183 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.3s)
+
+  === Acquisition 87 ===
+    Recon DAS ...
+    PSNR=18.61 dB  SSIM=0.3880  SNR=16.25 dB  CR_gt=-1.21 dB  CR_pred=1.31 dB  CNR_gt=0.178  CNR_pred=0.243
+    Speckle SNR  gt=2.065  pred=1.815
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.4s)
+
+  === Acquisition 88 ===
+    Recon DAS ...
+    PSNR=17.74 dB  SSIM=0.3537  SNR=15.13 dB  CR_gt=-4.22 dB  CR_pred=1.03 dB  CNR_gt=0.632  CNR_pred=0.186
+    Speckle SNR  gt=2.231  pred=1.960
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (43.2s)
+
+  === Acquisition 89 ===
+    Recon DAS ...
+    PSNR=17.06 dB  SSIM=0.3273  SNR=13.50 dB  CR_gt=-3.77 dB  CR_pred=-9.28 dB  CNR_gt=0.472  CNR_pred=0.914
+    Speckle SNR  gt=2.219  pred=1.343
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.2s)
+
+  === Acquisition 90 ===
+    Recon DAS ...
+    PSNR=18.30 dB  SSIM=0.3340  SNR=15.73 dB  CR_gt=-1.49 dB  CR_pred=2.74 dB  CNR_gt=0.206  CNR_pred=0.586
+    Speckle SNR  gt=2.109  pred=2.127
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (43.7s)
+
+  === Acquisition 91 ===
+    Recon DAS ...
+    PSNR=19.46 dB  SSIM=0.4188  SNR=17.82 dB  CR_gt=-5.48 dB  CR_pred=0.53 dB  CNR_gt=0.511  CNR_pred=0.102
+    Speckle SNR  gt=2.299  pred=3.715
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.6s)
+
+  === Acquisition 92 ===
+    Recon DAS ...
+    PSNR=18.15 dB  SSIM=0.3277  SNR=15.54 dB  CR_gt=-1.01 dB  CR_pred=2.88 dB  CNR_gt=0.154  CNR_pred=0.751
+    Speckle SNR  gt=2.373  pred=3.595
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.3s)
+
+  === Acquisition 93 ===
+    Recon DAS ...
+    PSNR=18.26 dB  SSIM=0.3565  SNR=16.10 dB  CR_gt=-5.21 dB  CR_pred=1.51 dB  CNR_gt=0.678  CNR_pred=0.279
+    Speckle SNR  gt=2.384  pred=1.793
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.3s)
+
+  === Acquisition 94 ===
+    Recon DAS ...
+    PSNR=17.77 dB  SSIM=0.3256  SNR=15.00 dB  CR_gt=-2.46 dB  CR_pred=1.18 dB  CNR_gt=0.351  CNR_pred=0.317
+    Speckle SNR  gt=2.286  pred=1.756
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.3s)
+
+  === Acquisition 95 ===
+    Recon DAS ...
+    PSNR=16.89 dB  SSIM=0.2995  SNR=12.72 dB  CR_gt=-12.03 dB  CR_pred=-4.85 dB  CNR_gt=0.600  CNR_pred=0.441
+    Speckle SNR  gt=2.267  pred=1.785
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.3s)
+
+  === Acquisition 96 ===
+    Recon DAS ...
+    PSNR=17.19 dB  SSIM=0.3080  SNR=14.22 dB  CR_gt=-1.22 dB  CR_pred=3.79 dB  CNR_gt=0.157  CNR_pred=0.458
+    Speckle SNR  gt=2.369  pred=1.917
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.4s)
+
+  === Acquisition 97 ===
+    Recon DAS ...
+    PSNR=17.20 dB  SSIM=0.3040  SNR=13.08 dB  CR_gt=-3.42 dB  CR_pred=-1.26 dB  CNR_gt=0.485  CNR_pred=0.183
+    Speckle SNR  gt=2.269  pred=2.091
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.000 mm
+    (43.2s)
+
+  === Acquisition 98 ===
+    Recon DAS ...
+    PSNR=16.75 dB  SSIM=0.3524  SNR=12.51 dB  CR_gt=-3.66 dB  CR_pred=0.98 dB  CNR_gt=0.373  CNR_pred=0.134
+    Speckle SNR  gt=2.213  pred=2.065
+    ACF FWHM ax  gt=0.296 mm  pred=0.887 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.3s)
+
+  === Acquisition 99 ===
+    Recon DAS ...
+    PSNR=16.89 dB  SSIM=0.2373  SNR=13.57 dB  CR_gt=-11.23 dB  CR_pred=-11.13 dB  CNR_gt=0.576  CNR_pred=0.461
+    Speckle SNR  gt=2.311  pred=1.952
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.2s)
+
+  === Acquisition 100 ===
+    Recon DAS ...
+    PSNR=16.60 dB  SSIM=0.2545  SNR=11.92 dB  CR_gt=-0.41 dB  CR_pred=3.12 dB  CNR_gt=0.064  CNR_pred=0.479
+    Speckle SNR  gt=2.167  pred=1.867
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.4s)
+
+  === Acquisition 101 ===
+    Recon DAS ...
+    PSNR=17.36 dB  SSIM=0.3058  SNR=13.97 dB  CR_gt=-2.29 dB  CR_pred=-1.17 dB  CNR_gt=0.284  CNR_pred=0.166
+    Speckle SNR  gt=2.242  pred=2.201
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.000 mm
+    (43.3s)
+
+  === Acquisition 102 ===
+    Recon DAS ...
+    PSNR=16.96 dB  SSIM=0.3061  SNR=13.41 dB  CR_gt=-3.08 dB  CR_pred=0.41 dB  CNR_gt=0.292  CNR_pred=0.053
+    Speckle SNR  gt=2.052  pred=1.777
+    ACF FWHM ax  gt=0.296 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.460 mm  pred=0.460 mm
+    (43.2s)
+
+  === Acquisition 103 ===
+    Recon DAS ...
+    PSNR=16.93 dB  SSIM=0.3186  SNR=13.44 dB  CR_gt=-5.14 dB  CR_pred=-0.38 dB  CNR_gt=0.476  CNR_pred=0.045
+    Speckle SNR  gt=2.262  pred=1.858
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.2s)
+
+  === Acquisition 104 ===
+    Recon DAS ...
+    PSNR=16.34 dB  SSIM=0.2719  SNR=12.18 dB  CR_gt=-1.53 dB  CR_pred=1.38 dB  CNR_gt=0.240  CNR_pred=0.232
+    Speckle SNR  gt=2.335  pred=2.085
+    ACF FWHM ax  gt=0.296 mm  pred=0.296 mm
+    ACF FWHM lat gt=0.000 mm  pred=0.460 mm
+    (43.1s)
+
+  === Acquisition 105 ===
+    Recon DAS ...
+    PSNR=16.24 dB  SSIM=0.2659  SNR=11.91 dB  CR_gt=-2.67 dB  CR_pred=1.07 dB  CNR_gt=0.383  CNR_pred=0.161
+    Speckle SNR  gt=2.249  pred=2.024
+    ACF FWHM ax  gt=0.000 mm  pred=0.000 mm
