@@ -449,11 +449,18 @@ def _compute_and_plot_das_2d(npz_path, pred_frames, gt_frames, init_frames,
                               single_angle_stride=1,
                               single_angle_max=None,
                               cs_ratio=8,
-                              max_acq=None):
+                              max_acq=None,
+                              acq_subset=None):
     """从 2D 帧级重建结果执行 DAS 波束形成 + B-mode 图像域指标.
 
     GT / Init 的 DAS 结果会自动缓存到 npz 同级 .das_cache 目录,
     后续评估同一数据集的不同模型时直接读取, 省去重复波束形成。
+
+    Parameters
+    ----------
+    acq_subset : sequence[int] or None
+        若指定, 仅在这些 acquisition_id 上做 DAS B-mode 评估 (默认全部).
+        与 max_acq 配合使用时, 先按 acq_subset 过滤再按 max_acq 均匀抽样.
     """
     fp = (file_prefix + "_") if file_prefix else ""
     try:
@@ -525,6 +532,13 @@ def _compute_and_plot_das_2d(npz_path, pred_frames, gt_frames, init_frames,
         first_das = {}
 
         sorted_aids = sorted(acq_gt.keys())
+        if acq_subset is not None:
+            allowed = {int(a) for a in acq_subset}
+            n_before = len(sorted_aids)
+            sorted_aids = [a for a in sorted_aids if int(a) in allowed]
+            preview = (sorted_aids if len(sorted_aids) <= 30
+                       else sorted_aids[:15] + ["..."] + sorted_aids[-5:])
+            print(f"  [acq_subset] 限定到 {len(sorted_aids)}/{n_before} acquisitions: {preview}")
         if max_acq is not None and max_acq > 0:
             n_total = len(sorted_aids)
             picks = sorted({sorted_aids[int(i)]
@@ -1371,6 +1385,9 @@ def evaluate_2d(load_model_fn, model_name, args):
     all_snrs, all_nmses, all_psnrs, all_ssims = [], [], [], []
     sample_counter = 0
 
+    eval_split = getattr(args, "eval_split", "val")
+    split_info_lines = []   # 写入 summary
+
     for di, npz_path in enumerate(npz_list):
         print(f"\n加载数据: {npz_path}")
         ds = UltrasoundFrameDataset(
@@ -1383,12 +1400,69 @@ def evaluate_2d(load_model_fn, model_name, args):
               f"n_frames={ds.n_frames}, samples={len(ds)}, unit={eval_unit}")
         op = ds.op
 
-        n_vis = min(args.n_vis, len(ds))
-        vis_indices = set(np.linspace(0, len(ds) - 1, n_vis, dtype=int))
+        # ---- 训练/验证切分 (与训练保持一致, 默认只评 val) ----
+        # 优先用 ckpt 里保存的 val_idx_per_ds / train_idx_per_ds (训练时若有写入).
+        # 否则用 config 里的 val_ratio/seed/split_mode 调用 split_indices 确定性复现.
+        if eval_split == "all" or ds.group_id is None:
+            eval_idx_list = list(range(len(ds)))
+            eval_acq_subset = None
+            split_line = (f"  [eval_split={eval_split}] 评估全部 {len(ds)} 样本"
+                          + ("" if ds.group_id is not None
+                             else " (npz 无 group_id, 退化为全集)"))
+            split_src = "all"
+            print(split_line)
+        else:
+            saved_val = ckpt.get("val_idx_per_ds", None)
+            saved_train = ckpt.get("train_idx_per_ds", None)
+            split_src = "config-rebuild"
+            use_saved = (saved_val is not None and saved_train is not None
+                         and di < len(saved_val) and di < len(saved_train))
+            if use_saved:
+                sv = np.asarray(saved_val[di], dtype=np.int64)
+                st = np.asarray(saved_train[di], dtype=np.int64)
+                if sv.size + st.size == len(ds):
+                    v_idx = torch.from_numpy(sv).long()
+                    t_idx = torch.from_numpy(st).long()
+                    split_src = "ckpt-saved"
+                else:
+                    print(f"  [警告] ckpt 内 val/train idx 长度 {sv.size}+{st.size} "
+                          f"≠ ds 长度 {len(ds)}, 回退到 config 复现")
+                    use_saved = False
+            if not use_saved:
+                cfg_val_ratio = float(config.get("val_ratio", 0.15))
+                cfg_seed = int(config.get("seed", 42))
+                cfg_split_mode = str(config.get("split_mode", "group"))
+                t_idx, v_idx = split_indices(
+                    num_samples=len(ds),
+                    val_ratio=cfg_val_ratio,
+                    seed=cfg_seed,
+                    split_mode=cfg_split_mode,
+                    group_id=ds.group_id,
+                )
+            sel_idx = v_idx if eval_split == "val" else t_idx
+            eval_idx_list = sel_idx.tolist()
+            gid_np = ds.group_id.detach().cpu().numpy()
+            eval_acq_subset = sorted({int(g) for g in gid_np[sel_idx.numpy()]})
+            split_line = (
+                f"  [eval_split={eval_split}/{split_src}] "
+                f"{len(eval_idx_list)}/{len(ds)} frames, "
+                f"{len(eval_acq_subset)} acquisitions"
+            )
+            print(split_line)
+            preview = (eval_acq_subset if len(eval_acq_subset) <= 30
+                       else eval_acq_subset[:15] + ["..."] + eval_acq_subset[-5:])
+            print(f"  acquisitions: {preview}")
+        split_info_lines.append(f"[ds{di}/{split_src}] {split_line.strip()}")
 
-        frame_preds, frame_gts, frame_inits = [], [], []
+        n_eval = len(eval_idx_list)
+        n_vis = min(args.n_vis, n_eval)
+        vis_set = set(np.array(eval_idx_list, dtype=int)[
+            np.linspace(0, n_eval - 1, n_vis, dtype=int)
+        ].tolist()) if n_eval > 0 else set()
 
-        for pi in range(len(ds)):
+        frame_preds_dict, frame_gts_dict, frame_inits_dict = {}, {}, {}
+
+        for pi in eval_idx_list:
             idx_t = torch.tensor([pi])
             x_input, y_target, y_k = ds.get_batch(idx_t, device=device)
             y_sub = y_k if y_k is not None else op.A(x_input)
@@ -1412,11 +1486,11 @@ def evaluate_2d(load_model_fn, model_name, args):
             init_np = x_init[0, 0].cpu().numpy()
 
             if eval_all:
-                frame_preds.append(pred_np)
-                frame_gts.append(gt_np)
-                frame_inits.append(init_np)
+                frame_preds_dict[pi] = pred_np
+                frame_gts_dict[pi] = gt_np
+                frame_inits_dict[pi] = init_np
 
-            if pi in vis_indices:
+            if pi in vis_set:
                 _plot_bmode_comparison_2d(
                     gt_np, pred_np, init_np,
                     os.path.join(out_dir, f"bmode_ds{di}_p{pi}.png"),
@@ -1434,15 +1508,32 @@ def evaluate_2d(load_model_fn, model_name, args):
 
         # DAS / PostDAS B-mode: 只在 eval_all + 全帧模式下可用
         if eval_all and not getattr(args, "no_das", False):
-            pred_3d = np.stack(frame_preds)   # (n_frames, H, W)
-            gt_3d = np.stack(frame_gts)
-            init_3d = np.stack(frame_inits)
+            if not frame_preds_dict:
+                print("  [警告] 当前 split 下无评估帧, 跳过 DAS")
+                continue
+
+            sample0 = next(iter(frame_preds_dict.values()))
+            H, W = sample0.shape
+            dtype = sample0.dtype
+            # 构造完整 (n_frames, H, W) 数组, 非评估位置填 NaN.
+            # regroup_frames 按 frame 数过滤完整 acquisition, 含 NaN 的 acq
+            # 会被 acq_subset 在 _compute_and_plot_das_2d 中显式过滤掉.
+            pred_3d = np.full((ds.n_frames, H, W), np.nan, dtype=dtype)
+            gt_3d = np.full_like(pred_3d, np.nan)
+            init_3d = np.full_like(pred_3d, np.nan)
+            for pi, arr in frame_preds_dict.items():
+                pred_3d[pi] = arr
+                gt_3d[pi] = frame_gts_dict[pi]
+                init_3d[pi] = frame_inits_dict[pi]
 
             np.savez_compressed(
                 os.path.join(out_dir, f"eval_frames_ds{di}.npz"),
                 pred=pred_3d, gt=gt_3d, init=init_3d,
+                eval_split=eval_split,
+                eval_idx=np.array(eval_idx_list, dtype=np.int64),
             )
-            print(f"  eval_frames_ds{di}.npz saved ({pred_3d.shape})")
+            print(f"  eval_frames_ds{di}.npz saved ({pred_3d.shape}, "
+                  f"{len(eval_idx_list)} non-nan frames)")
 
             ds_tag = f"ds{di}" if len(npz_list) > 1 else ""
 
@@ -1467,6 +1558,7 @@ def evaluate_2d(load_model_fn, model_name, args):
                         single_angle_max=getattr(args, "single_angle_max", None),
                         cs_ratio=cs_ratio,
                         max_acq=getattr(args, "max_acq", None),
+                        acq_subset=eval_acq_subset,
                     )
                 except Exception as e:
                     print(f"  [警告] DAS 可视化失败: {e}")
@@ -1483,6 +1575,7 @@ def evaluate_2d(load_model_fn, model_name, args):
 
     print(f"\n{'='*60}")
     print(f"  Model: {model_name} | Params: {num_params:,}")
+    print(f"  eval_split: {eval_split}")
     print(f"  Evaluated: {sample_counter} samples ({granularity})")
     print(f"  SNR  ({granularity}): {all_snrs.mean():.2f} +/- {all_snrs.std():.2f} dB")
     print(f"  PSNR ({granularity}): {all_psnrs.mean():.2f} +/- {all_psnrs.std():.2f} dB")
@@ -1497,6 +1590,9 @@ def evaluate_2d(load_model_fn, model_name, args):
         f.write(f"Checkpoint: {ckpt_path}\n")
         f.write(f"Params: {num_params:,}\n")
         f.write(f"Samples: {sample_counter} ({granularity})\n")
+        f.write(f"eval_split: {eval_split}\n")
+        for line in split_info_lines:
+            f.write(f"  {line}\n")
         f.write(f"eval_all: {eval_all}\n")
         f.write(f"patch_h: {patch_h}\n")
         f.write(f"SNR ({granularity}): {all_snrs.mean():.2f} +/- {all_snrs.std():.2f} dB\n")
@@ -1542,4 +1638,9 @@ def build_eval_parser_2d(description="2D 模型评估与可视化"):
                         help="覆盖 config 中的 patch_h (空间掩膜需设为全帧高度)")
     parser.add_argument("--max_acq", type=int, default=None,
                         help="DAS B-mode 仅评估均匀采样的 N 个 acquisition (默认全部)")
+    parser.add_argument("--eval_split", type=str, default="val",
+                        choices=["val", "train", "all"],
+                        help="评估集选择 (默认 val): 复现训练时的 train/val 切分."
+                             " val=仅验证集 (与 train_log.txt 的 val_snr 同口径);"
+                             " train=仅训练集 (诊断过拟合); all=全部样本.")
     return parser

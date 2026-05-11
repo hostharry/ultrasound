@@ -532,7 +532,22 @@ def run_train_2d(args, model, model_type, exp_name, arch_log_lines=None):
             for line in arch_log_lines:
                 log(f"  {line}")
 
-    extra_base = {"mode": "2d", "model_type": model_type}
+    val_idx_per_ds = [v.detach().cpu().numpy().astype("int64")
+                      for v in sampler.val_indices]
+    train_idx_per_ds = [t.detach().cpu().numpy().astype("int64")
+                        for t in sampler.train_indices]
+    extra_base = {
+        "mode": "2d",
+        "model_type": model_type,
+        "val_idx_per_ds": val_idx_per_ds,
+        "train_idx_per_ds": train_idx_per_ds,
+        "split_meta": {
+            "val_ratio": float(args.val_ratio),
+            "seed": int(args.seed),
+            "split_mode": str(args.split_mode),
+            "npz_paths": list(npz_list),
+        },
+    }
     val_bs = args.val_batch_size or args.batch_size
     for epoch in range(start_epoch, args.epochs + 1):
         model.train()
