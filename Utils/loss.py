@@ -7,6 +7,8 @@ used by the recent in-vivo experiments (SLAE, dB-distribution KLD, DAS loss).
 
 from __future__ import annotations
 
+import math
+
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -62,26 +64,23 @@ def _db_magnitude(x, alpha_db: float = -60.0):
 
 
 def signed_log_l1(pred, gt, alpha_db=-60.0, weight=None):
-    """Signed Log Absolute Error: 正负分离 + log10 幅度域 L1.
+    """Canonical MSLAE (Perdios et al., TUFFC 2022, Eq. 6).
 
-    受 SMSLE 启发, 先把信号拆成正/负两支, 各自在对数幅度域比较, 再平均.
-    既保留极性信息, 又能避免 sign(x) 在 0 处梯度跳变, 适合高动态范围 RF.
-    单像素误差范围在 [0, |alpha_db|/20] 内 (默认 alpha_db=-60 时 ≤ 3).
+    sign(x) is factored out as an outer polarity multiplier; the magnitude
+    compress is a single smooth function of |x|. Output normalized to [-1, +1].
+    Equivalent to dperdios/dui-ultrafast `_compress_to_signed_log` in PyTorch.
     """
     alpha = _alpha_from_db(alpha_db)
-    pred_pos = pred.clamp(min=0.0)
-    gt_pos = gt.clamp(min=0.0)
-    pred_neg = (-pred).clamp(min=0.0)
-    gt_neg = (-gt).clamp(min=0.0)
+    log_alpha = math.log(alpha)
 
-    err_pos = (torch.log10(pred_pos.clamp(min=alpha))
-               - torch.log10(gt_pos.clamp(min=alpha))).abs()
-    err_neg = (torch.log10(pred_neg.clamp(min=alpha))
-               - torch.log10(gt_neg.clamp(min=alpha))).abs()
+    def compress(x):
+        x_abs_clp = x.abs().clamp(min=alpha)
+        return torch.sign(x) * torch.log(alpha / x_abs_clp) / log_alpha
+
+    err = (compress(pred) - compress(gt)).abs()
     if weight is not None:
-        err_pos = err_pos * weight
-        err_neg = err_neg * weight
-    return 0.5 * (err_pos.mean() + err_neg.mean())
+        err = err * weight
+    return err.mean()
 
 
 def envelope_l1(pred, gt, envelope_fn=None, use_log=False, weight=None,
@@ -103,38 +102,43 @@ def msle(pred, gt, weight=None):
 def kld_db_distribution(pred, gt, alpha_db: float = -60.0, *,
                         low_db: float = -60.0, high_db: float = 0.0,
                         n_bins: int = 40, eta: float = 0.5,
-                        eps: float = 1e-8, var_floor: float = 0.01,
-                        kld_cap: float = 50.0):
-    """高斯近似 KLD: 假设 dB 分布近似高斯, 用解析公式替代软直方图.
+                        eps: float = 1e-8, n_samples: int = 16384,
+                        **_legacy):
+    """Canonical KLD-MSLAE distribution term (Vinals & Thiran, J. Imaging 2023, Eq. 5).
 
-    D_KL(p || q) = log(σ_q/σ_p) + (σ_p² + (μ_p - μ_q)²) / (2σ_q²) - 1/2
-
-    复杂度从 O(B·M·K) 降到 O(B·M), 显存和耗时降低约 K=40 倍.
-    `low_db / high_db / n_bins / eta / eps` 保留以兼容老接口, 不再使用.
-
-    `kld_cap` 控制软上限: 用 cap·tanh(kld/cap) 替代 hard clamp,
-    KLD<10 时几乎线性 (<3% 误差), KLD→∞ 渐近 cap 但梯度处处非零,
-    避免 hard clamp 顶到上限后零梯度死区导致的不可恢复塌陷.
-    `kld_cap<=0` 则关闭软上限 (用于调试).
+    Soft histogram with logistic kernel; differentiable; no Gaussian assumption,
+    no 1/sigma singularity, no saturation cap. Sub-samples n_samples=16384
+    pixels per frame for tractable cost (per-bin coverage ~400 samples at K=40).
+    Legacy keys (var_floor, kld_cap) accepted via **_legacy and silently ignored.
     """
     pred_db = _db_magnitude(pred, alpha_db=alpha_db)
     gt_db = _db_magnitude(gt.detach(), alpha_db=alpha_db)
 
-    def _stats(v):
-        flat = v.reshape(v.shape[0], -1)
-        mu = flat.mean(dim=1)
-        var = flat.var(dim=1).clamp(min=var_floor)
-        return mu, var
+    B = pred_db.shape[0]
+    pred_flat = pred_db.reshape(B, -1)
+    gt_flat = gt_db.reshape(B, -1)
+    M = pred_flat.shape[1]
+    if n_samples is not None and 0 < n_samples < M:
+        idx = torch.randint(0, M, (n_samples,), device=pred.device)
+        pred_flat = pred_flat.index_select(1, idx)
+        gt_flat = gt_flat.index_select(1, idx)
 
-    mu_p, var_p = _stats(gt_db)
-    mu_q, var_q = _stats(pred_db)
+    delta = (high_db - low_db) / n_bins
+    centers = torch.linspace(
+        low_db + 0.5 * delta, high_db - 0.5 * delta, n_bins,
+        device=pred.device, dtype=pred.dtype,
+    )
 
-    kld = (torch.log(var_q.sqrt() / var_p.sqrt())
-           + (var_p + (mu_p - mu_q).pow(2)) / (2.0 * var_q)
-           - 0.5)
-    if kld_cap and kld_cap > 0:
-        kld = kld_cap * torch.tanh(kld / kld_cap)
-    return kld.mean()
+    def soft_hist(z):
+        d = z.unsqueeze(-1) - centers  # [B, M_sub, K]
+        contrib = (torch.sigmoid(eta * (d + delta / 2))
+                   - torch.sigmoid(eta * (d - delta / 2)))
+        h = contrib.sum(dim=1)  # [B, K]
+        return h / h.sum(dim=1, keepdim=True).clamp(min=eps)
+
+    p = soft_hist(gt_flat)
+    q = soft_hist(pred_flat)
+    return (p * (torch.log(p + eps) - torch.log(q + eps))).sum(dim=1).mean()
 
 
 def kld_mslae_loss(pred, gt, alpha_db=-60.0, beta_kld=0.5,
@@ -385,3 +389,35 @@ __all__ = [
     "das_image_loss",
     "CombinedLoss",
 ]
+
+if __name__ == "__main__":
+    torch.manual_seed(0)
+    B, M = 2, 1024
+    pred = torch.randn(B, 1, M, requires_grad=True)
+    gt = torch.randn(B, 1, M)
+
+    # SLAE sanity
+    assert signed_log_l1(gt, gt).item() < 1e-6, "SLAE pred=gt should be 0"
+    s_rand = signed_log_l1(pred, gt)
+    assert 0 < s_rand.item() < 2, f"SLAE random not in expected range: {s_rand.item()}"
+    print(f"SLAE rand={s_rand.item():.4f}")
+
+    # KLD sanity
+    assert kld_db_distribution(gt, gt).item() < 0.1, "KLD pred=gt should be ~0"
+    k_rand = kld_db_distribution(pred, gt, n_samples=4096)
+    assert 0 < k_rand.item() < 5, f"KLD random not bounded: {k_rand.item()}"
+    print(f"KLD rand={k_rand.item():.4f}")
+
+    # Gradient flow at near-zero pred (use a lower dB floor so 1e-4-scale RF
+    # exceeds the linear noise floor; default -60 dB floor would zero gradients)
+    pred_small = (torch.randn_like(gt) * 1e-4).requires_grad_(True)
+    loss = (
+        signed_log_l1(pred_small, gt, alpha_db=-120.0)
+        + kld_db_distribution(pred_small, gt, alpha_db=-120.0)
+    )
+    loss.backward()
+    g_norm = pred_small.grad.norm().item()
+    print(f"Grad at small pred: {g_norm:.4g} (should be > 0)")
+    assert g_norm > 1e-6, "Gradient should flow at small pred via KLD"
+
+    print("All sanity checks passed.")
