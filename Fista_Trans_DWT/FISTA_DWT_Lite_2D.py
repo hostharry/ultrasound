@@ -25,6 +25,9 @@ from ops import smooth_soft_threshold
 
 _N_BANDS = 4  # LL, LH, HL, HH
 
+# HASA λ_tv / λ_wav 下限: 防止 softplus 左侧梯度死区 + 训练中漂到近零
+LAMBDA_FLOOR = 5e-3
+
 
 # ═══════════════════════ Multi-scale HASA 2D ═══════════════════════
 
@@ -44,43 +47,45 @@ class MultiScaleHASA2D(nn.Module):
         ctx_pad = context_dilation * (context_ks // 2)
 
         # local branch
-        local_layers = [nn.Conv2d(1, hidden_ch, 3, padding=1), nn.ReLU(inplace=True)]
+        local_layers = [nn.Conv2d(1, hidden_ch, 3, padding=1), nn.GELU()]
         for _ in range(num_layers - 1):
             local_layers.extend([
                 nn.Conv2d(hidden_ch, hidden_ch, inner_ks, padding=inner_pad),
-                nn.ReLU(inplace=True),
+                nn.GELU(),
             ])
         self.local_net = nn.Sequential(*local_layers)
 
         # context branch: dilated convs for larger receptive field
-        ctx_layers = [nn.Conv2d(1, hidden_ch, 3, padding=1), nn.ReLU(inplace=True)]
+        ctx_layers = [nn.Conv2d(1, hidden_ch, 3, padding=1), nn.GELU()]
         for _ in range(num_layers - 1):
             ctx_layers.extend([
                 nn.Conv2d(hidden_ch, hidden_ch, context_ks,
                           padding=ctx_pad, dilation=context_dilation),
-                nn.ReLU(inplace=True),
+                nn.GELU(),
             ])
         self.context_net = nn.Sequential(*ctx_layers)
 
         # merge: concat (2*hidden_ch) -> hidden_ch
         self.merge = nn.Sequential(
             nn.Conv2d(hidden_ch * 2, hidden_ch, 1),
-            nn.ReLU(inplace=True),
+            nn.GELU(),
         )
 
         self.head_tv = nn.Sequential(nn.Conv2d(hidden_ch, 1, 1), nn.Softplus())
         self.head_wav = nn.Sequential(nn.Conv2d(hidden_ch, 1, 1), nn.Softplus())
         self.head_alpha = nn.Sequential(nn.Conv2d(hidden_ch, 1, 1), nn.Sigmoid())
 
-        nn.init.constant_(self.head_tv[0].bias, -4.0)
-        nn.init.constant_(self.head_wav[0].bias, -4.0)
+        nn.init.constant_(self.head_tv[0].bias, -2.0)
+        nn.init.constant_(self.head_wav[0].bias, -2.0)
         nn.init.constant_(self.head_alpha[0].bias, 0.0)
 
     def forward(self, x):
         f_local = self.local_net(x)
         f_ctx = self.context_net(x)
         feat = self.merge(torch.cat([f_local, f_ctx], dim=1))
-        return self.head_tv(feat), self.head_wav(feat), self.head_alpha(feat)
+        lam_tv = self.head_tv(feat) + LAMBDA_FLOOR
+        lam_wav = self.head_wav(feat) + LAMBDA_FLOOR
+        return lam_tv, lam_wav, self.head_alpha(feat)
 
 
 # ═══════════════════════ Mini-U-Net HASA 2D ═══════════════════════
@@ -136,8 +141,8 @@ class MiniUNetHASA2D(nn.Module):
         self.head_wav = nn.Sequential(nn.Conv2d(c1, 1, 1), nn.Softplus())
         self.head_alpha = nn.Sequential(nn.Conv2d(c1, 1, 1), nn.Sigmoid())
 
-        nn.init.constant_(self.head_tv[0].bias, -4.0)
-        nn.init.constant_(self.head_wav[0].bias, -4.0)
+        nn.init.constant_(self.head_tv[0].bias, -2.0)
+        nn.init.constant_(self.head_wav[0].bias, -2.0)
         nn.init.constant_(self.head_alpha[0].bias, 0.0)
 
     def forward(self, x):
@@ -156,7 +161,9 @@ class MiniUNetHASA2D(nn.Module):
         u1 = F.interpolate(u2, size=f1.shape[-2:], mode='bilinear', align_corners=False)
         u1 = self.dec2(torch.cat([self.up_reduce2(u1), f1], dim=1))
 
-        return self.head_tv(u1), self.head_wav(u1), self.head_alpha(u1)
+        lam_tv = self.head_tv(u1) + LAMBDA_FLOOR
+        lam_wav = self.head_wav(u1) + LAMBDA_FLOOR
+        return lam_tv, lam_wav, self.head_alpha(u1)
 
 
 # ═══════════════════════ 2D Haar (单层, 4 子带) ═══════════════════════
@@ -457,7 +464,8 @@ class FISTA_DWT_Lite_Block_2D(nn.Module):
         z = v - rho_val * grad
 
         lambda_tv, lambda_wav, alpha = self.weight(z)
-        x_next, feat_fused = self.prox(z, eta_val * lambda_tv, eta_val * lambda_wav, alpha=alpha)
+        # 不传 alpha: prox 走 0.5*(delta_tv + delta_wav); head_alpha 仍输出供诊断
+        x_next, feat_fused = self.prox(z, eta_val * lambda_tv, eta_val * lambda_wav)
 
         v_next = x_next + torch.tanh(self.beta) * (x_next - x_prev)
 
