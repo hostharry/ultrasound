@@ -1,4 +1,4 @@
-"""FISTA-DWT-Lite-2D 评估 (支持 conv / unet HASA)."""
+"""FISTA-DWT-LiteV3-2D 评估 (V2 + Pre-Norm GroupNorm)."""
 
 import sys
 import os
@@ -7,12 +7,10 @@ _UTILS_DIR = os.path.join(os.path.dirname(__file__), "..", "Utils")
 if _UTILS_DIR not in sys.path:
     sys.path.insert(0, _UTILS_DIR)
 
-from FISTA_DWT_Lite_2D import (
-    FISTA_DWT_Lite_2D_Net, MultiScaleHASA2D, MiniUNetHASA2D,
+from FISTA_DWT_LiteV3_2D import (
+    FISTA_DWT_LiteV3_2D_Net, MultiScaleHASA2D, MiniUNetHASA2D,
 )
 from evaluate_common import evaluate_2d, build_eval_parser_2d
-
-
 
 
 def _cfg_int(cfg, key, default):
@@ -36,7 +34,8 @@ def load_model(config, ckpt, device):
     num_cb = _cfg_int(config, "num_conv_blocks", 2)
     conv_ks = _cfg_int(config, "conv_ks", 5)
     J = _cfg_int(config, "dwt_levels", 1)
-    prox_tau = _cfg_float(config, "prox_tau", 0.01)
+    prox_tau = _cfg_float(config, "prox_tau", 0.005)
+    num_groups = _cfg_int(config, "num_groups", 8)
 
     hasa_type = str(config.get("hasa_type", "conv")).strip()
 
@@ -54,7 +53,7 @@ def load_model(config, ckpt, device):
             context_ks=ctx_ks, context_dilation=ctx_dil,
         )
 
-    model = FISTA_DWT_Lite_2D_Net(
+    model = FISTA_DWT_LiteV3_2D_Net(
         layer_num=layers,
         hasa_ctor=hasa_ctor,
         d_model=d_model,
@@ -62,6 +61,7 @@ def load_model(config, ckpt, device):
         conv_ks=conv_ks,
         J=J,
         prox_tau=prox_tau,
+        num_groups=num_groups,
     ).to(device)
 
     from train_common import load_model_state_dict
@@ -71,5 +71,5 @@ def load_model(config, ckpt, device):
 
 
 if __name__ == "__main__":
-    args = build_eval_parser_2d("FISTA-DWT-Lite-2D 评估").parse_args()
-    evaluate_2d(load_model, "FISTA-DWT-Lite-2D", args)
+    args = build_eval_parser_2d("FISTA-DWT-LiteV3-2D 评估").parse_args()
+    evaluate_2d(load_model, "FISTA-DWT-LiteV3-2D", args)

@@ -3,7 +3,9 @@
 from __future__ import annotations
 
 import os
+import re
 import time
+from contextlib import nullcontext
 from typing import Iterable
 
 import numpy as np
@@ -12,9 +14,89 @@ import torch
 from loss import CombinedLoss
 from metrics import calc_nmse, calc_snr
 
+torch.backends.cudnn.benchmark = True
+
+
+def _amp_ctx(use_amp: bool, dtype=torch.bfloat16):
+    if not use_amp or not torch.cuda.is_available():
+        return nullcontext()
+    return torch.autocast(device_type="cuda", dtype=dtype)
+
+
+# HASA 模块在 V3 里被命名为 `weight` 子模块: blocks.{i}.weight.{...}
+# 三层兼容: DDP (module.) + torch.compile (_orig_mod.) + 原始路径
+_HASA_PATTERN = re.compile(r'^(?:module\.)?(?:_orig_mod\.)?blocks\.\d+\.weight\.')
+
+
+def get_param_groups(model, weight_decay):
+    """把模型参数拆成 (decay, no_decay) 两组.
+
+    no_decay (放宽 / 不做权重衰减):
+      - 所有 .bias
+      - 所有 norm 层 (GroupNorm/LayerNorm/BatchNorm 的 weight/bias)
+      - HASA 卷积权重 (head_tv/wav, local_net, context_net, merge 的 .weight)
+      - LayerScale (layerscale_tv / layerscale_wav 等; 1e-2 init 必须允许成长)
+      - HASA log_base_tv / log_base_wav: !!! 不能 decay !!!
+          softplus 反推: log_base init -2.0 -> softplus = 0.127 (lam_base);
+          AdamW decay 把 raw -2.0 拉向 0 -> softplus -> 0.693, lam_base 反而 ×5.
+          只能靠 loss gradient 调; 若需进一步约束, 走 anchor loss 而非 decay.
+
+    decay (吃 weight_decay; 防止漂移):
+      - 所有普通卷积 / Linear 的 .weight
+      - FISTA 标量 rho / soft_thr / beta:
+          这三个 raw 在 V3 是正向漂移 (rho +0.5->+2.07, soft_thr +0.01->+0.45),
+          decay 把 raw 拉向 0 -> softplus 收敛到 0.693, 是抑制方向 ✓.
+    """
+    decay, no_decay = [], []
+    for name, p in model.named_parameters():
+        if not p.requires_grad:
+            continue
+        leaf = name.split('.')[-1]
+
+        is_no_decay = False
+        if name.endswith('.bias'):
+            is_no_decay = True
+        elif 'norm' in name.lower():
+            is_no_decay = True
+        elif leaf.startswith('layerscale'):
+            is_no_decay = True
+        elif 'log_base' in leaf:
+            # log_base_tv / log_base_wav: 必须 no-decay (softplus 反推方向问题)
+            is_no_decay = True
+        elif _HASA_PATTERN.match(name) is not None and leaf == 'weight':
+            # HASA 内部 Conv2d.weight (head_*/local_net/context_net/merge);
+            # 'norm' 已被上面命中, 不会经过这里
+            is_no_decay = True
+        # 其它 HASA-pattern 命中但不是 .weight 也不是 log_base: 暂时还没有这种情况
+        # rho/soft_thr/beta: 全不命中, 落到 decay (期望行为)
+
+        (no_decay if is_no_decay else decay).append(p)
+
+    # id-based 严格校验: 无重复, 无遗漏
+    decay_ids = {id(p) for p in decay}
+    no_decay_ids = {id(p) for p in no_decay}
+    all_ids = {id(p) for p in model.parameters() if p.requires_grad}
+    overlap = decay_ids & no_decay_ids
+    missing = all_ids - (decay_ids | no_decay_ids)
+    assert not overlap, f"[get_param_groups] 参数同时进了两组: {len(overlap)}"
+    assert not missing, f"[get_param_groups] 参数遗漏: {len(missing)}"
+
+    decay_n = sum(p.numel() for p in decay)
+    no_decay_n = sum(p.numel() for p in no_decay)
+    print(f"[Optim] param groups: decay={len(decay)} ({decay_n/1e6:.3f}M), "
+          f"no_decay={len(no_decay)} ({no_decay_n/1e6:.3f}M)")
+
+    return [
+        {'params': decay,    'weight_decay': float(weight_decay)},
+        {'params': no_decay, 'weight_decay': 0.0},
+    ]
+
 
 def create_optimizer(model, lr, weight_decay, epochs, warm_restarts=0):
-    optimizer = torch.optim.Adam(model.parameters(), lr=lr, weight_decay=weight_decay)
+    fused_ok = torch.cuda.is_available()
+    param_groups = get_param_groups(model, weight_decay)
+    optimizer = torch.optim.AdamW(
+        param_groups, lr=lr, fused=fused_ok)
     if warm_restarts > 0:
         scheduler = torch.optim.lr_scheduler.CosineAnnealingWarmRestarts(
             optimizer, T_0=warm_restarts, T_mult=2, eta_min=lr * 0.01)
@@ -85,10 +167,20 @@ def save_config(save_dir, args):
             f.write(f"{k}: {v}\n")
 
 
+def _compute_constraints_flag(criterion):
+    return getattr(criterion, "gamma_constraint", 0.0) > 0
+
+
+def _model_forward(model, y_sub, op, criterion):
+    cc = _compute_constraints_flag(criterion)
+    return model(y_sub, op, return_aux=True, compute_constraints=cc)
+
+
 def train_one_batch(model, y_sub, y_target, op, criterion, optimizer,
-                    grad_clip, das_meta=None):
-    x_hat, aux_list = model(y_sub, op, return_aux=True)
-    loss, loss_dict = criterion(x_hat, y_target, aux_list, das_meta=das_meta)
+                    grad_clip, das_meta=None, use_amp=False):
+    with _amp_ctx(use_amp):
+        x_hat, aux_list = _model_forward(model, y_sub, op, criterion)
+        loss, loss_dict = criterion(x_hat, y_target, aux_list, das_meta=das_meta)
 
     optimizer.zero_grad(set_to_none=True)
     loss.backward()
@@ -101,9 +193,11 @@ def train_one_batch(model, y_sub, y_target, op, criterion, optimizer,
     return loss_dict["loss_total"], snr
 
 
-def validate_one_batch(model, y_sub, y_target, op, criterion, das_meta=None):
-    x_hat, aux_list = model(y_sub, op, return_aux=True)
-    _, loss_dict = criterion(x_hat, y_target, aux_list, das_meta=das_meta)
+def validate_one_batch(model, y_sub, y_target, op, criterion,
+                       das_meta=None, use_amp=False):
+    with _amp_ctx(use_amp):
+        x_hat, aux_list = _model_forward(model, y_sub, op, criterion)
+        _, loss_dict = criterion(x_hat, y_target, aux_list, das_meta=das_meta)
     snr = calc_snr(y_target, x_hat).mean().item()
     nmse = calc_nmse(y_target, x_hat).mean().item()
     init_snr = calc_snr(y_target, op.At(y_sub)).mean().item()
@@ -121,7 +215,14 @@ def _aux_scalar(aux, key, default=0.0):
 
 def format_epoch_log(epoch, total_epochs, train_loss, train_snr,
                      val_loss_dict, val_snr, val_nmse, init_snr,
-                     aux_last, lr, elapsed):
+                     aux_last, lr, elapsed,
+                     cov_summary=None):
+    """Format two-line epoch log.
+
+    cov_summary (optional): {"cov_tv": [L0..Ln], "cov_wav": [L0..Ln]} per-layer
+    spatial Coefficient of Variation (%) for HASA-output lambdas, averaged
+    across all val batches. None / empty -> CoV 行不输出, 兼容 V1/V2/HUNet/ADMM.
+    """
     parts = [
         f"RF:{val_loss_dict.get('loss_rf', 0):.5f}",
         f"Env:{val_loss_dict.get('loss_env', 0):.5f}",
@@ -154,14 +255,104 @@ def format_epoch_log(epoch, total_epochs, train_loss, train_snr,
         line2 += f" gamma={_aux_scalar(aux_last, 'gamma'):.3f}"
     if aux_last and "alpha" in aux_last:
         line2 += f" alpha={_aux_scalar(aux_last, 'alpha'):.3f}"
+
+    if cov_summary:
+        cov_tv = cov_summary.get("cov_tv") or []
+        cov_wav = cov_summary.get("cov_wav") or []
+        if cov_tv:
+            line2 += "  CoV_tv=[" + ",".join(f"{v:.1f}%" for v in cov_tv) + "]"
+        if cov_wav:
+            line2 += " CoV_wav=[" + ",".join(f"{v:.1f}%" for v in cov_wav) + "]"
     return line1, line2
+
+
+def _compute_cov_per_batch(aux_list):
+    """计算单个 forward 的 per-layer lambda CoV (%).
+
+    Returns: (cov_tv_layers, cov_wav_layers), 每个是 list of float (per FISTA layer).
+    没有 lambda_tv/lambda_wav key 的 layer 返回空 list.
+    """
+    cov_tv, cov_wav = [], []
+    for aux in aux_list:
+        for key, out in [("lambda_tv", cov_tv), ("lambda_wav", cov_wav)]:
+            t = aux.get(key) if aux else None
+            if t is None or not torch.is_tensor(t):
+                continue
+            t = t.detach().float()
+            if t.dim() < 4:
+                continue
+            mean = t.mean(dim=(2, 3))
+            std = t.std(dim=(2, 3))
+            cov = (std / (mean + 1e-8)).mean().item() * 100.0
+            out.append(cov)
+    return cov_tv, cov_wav
+
+
+def _aggregate_cov(per_batch_tv, per_batch_wav):
+    """跨 batch 平均 per-layer CoV. 容忍各 batch layer 数不一致 (取最小长度)."""
+    def _avg(per_batch):
+        if not per_batch:
+            return []
+        n_layers = min(len(b) for b in per_batch if b)
+        if n_layers == 0:
+            return []
+        arr = np.array([b[:n_layers] for b in per_batch if len(b) >= n_layers],
+                       dtype=np.float64)
+        if arr.size == 0:
+            return []
+        return arr.mean(axis=0).tolist()
+    return {
+        "cov_tv": _avg(per_batch_tv),
+        "cov_wav": _avg(per_batch_wav),
+    }
+
+
+def _unwrap_model(model):
+    """Return the un-wrapped underlying module.
+
+    Handles `torch.compile` (`_orig_mod`) and DDP (`module`) wrappers so
+    saved checkpoints are always keyed against the original architecture.
+    """
+    inner = model
+    while True:
+        if hasattr(inner, "_orig_mod"):
+            inner = inner._orig_mod
+            continue
+        if hasattr(inner, "module") and isinstance(inner.module, torch.nn.Module):
+            inner = inner.module
+            continue
+        return inner
+
+
+def strip_orig_mod_prefix(state_dict):
+    """Strip `_orig_mod.` / `module.` prefixes from a checkpoint state_dict.
+
+    Backward-compat for checkpoints saved before _unwrap_model was added.
+    """
+    if not state_dict:
+        return state_dict
+    new_sd = {}
+    for k, v in state_dict.items():
+        nk = k
+        while nk.startswith("_orig_mod."):
+            nk = nk[len("_orig_mod."):]
+        while nk.startswith("module."):
+            nk = nk[len("module."):]
+        new_sd[nk] = v
+    return new_sd
+
+
+def load_model_state_dict(model, state_dict, strict=True):
+    """Robust load: strips wrapper prefixes if needed."""
+    sd = strip_orig_mod_prefix(state_dict)
+    return _unwrap_model(model).load_state_dict(sd, strict=strict)
 
 
 def save_best(save_dir, epoch, model, optimizer, scheduler, val_snr, val_loss,
               args, extra=None):
     ckpt = {
         "epoch": epoch,
-        "model_state_dict": model.state_dict(),
+        "model_state_dict": _unwrap_model(model).state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "scheduler_state_dict": scheduler.state_dict(),
         "val_snr": val_snr,
@@ -178,7 +369,7 @@ def save_best(save_dir, epoch, model, optimizer, scheduler, val_snr, val_loss,
 def save_checkpoint(save_dir, epoch, model, optimizer, scheduler, extra=None):
     ckpt = {
         "epoch": epoch,
-        "model_state_dict": model.state_dict(),
+        "model_state_dict": _unwrap_model(model).state_dict(),
         "optimizer_state_dict": optimizer.state_dict(),
         "scheduler_state_dict": scheduler.state_dict(),
     }
@@ -191,7 +382,7 @@ def save_final(save_dir, epochs, model, best_val_snr, best_epoch, args,
                extra=None):
     ckpt = {
         "epoch": epochs,
-        "model_state_dict": model.state_dict(),
+        "model_state_dict": _unwrap_model(model).state_dict(),
         "best_val_snr": best_val_snr,
         "best_epoch": best_epoch,
         "args": vars(args),
@@ -234,7 +425,7 @@ def override_args_from_checkpoint(args, ckpt_path):
 
 def resume_training(ckpt_path, model, optimizer, scheduler, device=None):
     ckpt = torch.load(ckpt_path, map_location=device or "cpu", weights_only=False)
-    model.load_state_dict(ckpt["model_state_dict"])
+    load_model_state_dict(model, ckpt["model_state_dict"])
     if "optimizer_state_dict" in ckpt:
         optimizer.load_state_dict(ckpt["optimizer_state_dict"])
     if "scheduler_state_dict" in ckpt:
@@ -254,6 +445,8 @@ def add_common_train_args(parser, defaults_2d=False):
     parser.add_argument("--layers", type=int, default=4 if defaults_2d else 9)
 
     parser.add_argument("--gamma_env", type=float, default=0.1)
+    parser.add_argument("--gamma_constraint", type=float, default=0.0,
+                        help="Feature-domain symmetry loss weight (V2/V3 only)")
     parser.add_argument("--loss_mode", type=str, default="mse",
                         choices=["mse", "nmse", "nmse_logenv", "slae"])
     parser.add_argument("--depth_weight", type=str, default="none",
@@ -377,6 +570,7 @@ def run_train_1d(args, model, model_type, exp_name, arch_log_lines=None):
 
     op = dataset.op
     extra_base = {"model_type": model_type}
+    use_amp = getattr(args, "amp", False)
     for epoch in range(start_epoch, args.epochs + 1):
         model.train()
         t0 = time.time()
@@ -388,21 +582,23 @@ def run_train_1d(args, model, model_type, exp_name, arch_log_lines=None):
             x_input, y_target, y_k = dataset.get_batch(idx, device=device)
             y_sub = y_k if y_k is not None else op.A(x_input)
             lv, sv = train_one_batch(
-                model, y_sub, y_target, op, criterion, optimizer, args.grad_clip)
+                model, y_sub, y_target, op, criterion, optimizer, args.grad_clip,
+                use_amp=use_amp)
             epoch_loss += lv
             epoch_snr += sv
         epoch_loss /= max(n_batches, 1)
         epoch_snr /= max(n_batches, 1)
         scheduler.step()
 
-        val_ld, val_snr, val_nmse, init_snr, aux_last = _validate_1d(
-            model, dataset, op, criterion, val_idx, args.batch_size, device)
+        val_ld, val_snr, val_nmse, init_snr, aux_last, cov_summary = _validate_1d(
+            model, dataset, op, criterion, val_idx, args.batch_size, device,
+            use_amp=use_amp)
         elapsed = time.time() - t0
         if epoch % args.log_interval == 0 or epoch == 1:
             l1, l2 = format_epoch_log(
                 epoch, args.epochs, epoch_loss, epoch_snr, val_ld, val_snr,
                 val_nmse, init_snr, aux_last, optimizer.param_groups[0]["lr"],
-                elapsed)
+                elapsed, cov_summary=cov_summary)
             log(l1)
             log(l2)
         if val_snr > best_val_snr:
@@ -422,11 +618,14 @@ def run_train_1d(args, model, model_type, exp_name, arch_log_lines=None):
                       "val_idx": val_idx.cpu()})
 
 
-def _validate_1d(model, dataset, op, criterion, val_idx, batch_size, device):
+def _validate_1d(model, dataset, op, criterion, val_idx, batch_size, device,
+                 use_amp=False):
     model.eval()
     val_loss_acc = {}
     val_snr_acc = val_nmse_acc = init_snr_acc = 0.0
     aux_list = None
+    cov_tv_per_batch = []
+    cov_wav_per_batch = []
     with torch.no_grad():
         n_val = len(val_idx)
         for s in range(0, n_val, batch_size):
@@ -435,7 +634,7 @@ def _validate_1d(model, dataset, op, criterion, val_idx, batch_size, device):
             x_input, y_target, y_k = dataset.get_batch(idx, device=device)
             y_sub = y_k if y_k is not None else op.A(x_input)
             vld, vs, vn, ins, al = validate_one_batch(
-                model, y_sub, y_target, op, criterion)
+                model, y_sub, y_target, op, criterion, use_amp=use_amp)
             w = (e - s) / max(n_val, 1)
             for k, v in vld.items():
                 val_loss_acc[k] = val_loss_acc.get(k, 0.0) + v * w
@@ -443,7 +642,19 @@ def _validate_1d(model, dataset, op, criterion, val_idx, batch_size, device):
             val_nmse_acc += vn * w
             init_snr_acc += ins * w
             aux_list = al
-    return val_loss_acc, val_snr_acc, val_nmse_acc, init_snr_acc, (aux_list[-1] if aux_list else {})
+            if al:
+                ctv, cwav = _compute_cov_per_batch(al)
+                if ctv: cov_tv_per_batch.append(ctv)
+                if cwav: cov_wav_per_batch.append(cwav)
+    cov_summary = _aggregate_cov(cov_tv_per_batch, cov_wav_per_batch)
+    return (
+        val_loss_acc,
+        val_snr_acc,
+        val_nmse_acc,
+        init_snr_acc,
+        (aux_list[-1] if aux_list else {}),
+        cov_summary,
+    )
 
 
 def _probe_xz(probe_geometry):
@@ -549,6 +760,7 @@ def run_train_2d(args, model, model_type, exp_name, arch_log_lines=None):
         },
     }
     val_bs = args.val_batch_size or args.batch_size
+    use_amp = getattr(args, "amp", False)
     for epoch in range(start_epoch, args.epochs + 1):
         model.train()
         t0 = time.time()
@@ -560,7 +772,7 @@ def run_train_2d(args, model, model_type, exp_name, arch_log_lines=None):
             das_meta = _batch_das_meta(ds, idx, das_modules.get(id(ds)), device)
             lv, sv = train_one_batch(
                 model, y_sub, y_target, op, criterion, optimizer,
-                args.grad_clip, das_meta=das_meta)
+                args.grad_clip, das_meta=das_meta, use_amp=use_amp)
             epoch_loss += lv
             epoch_snr += sv
             n_batches += 1
@@ -568,14 +780,15 @@ def run_train_2d(args, model, model_type, exp_name, arch_log_lines=None):
         epoch_snr /= max(n_batches, 1)
         scheduler.step()
 
-        val_ld, val_snr, val_nmse, init_snr, aux_last = _validate_2d(
-            model, sampler, criterion, val_bs, das_modules, device)
+        val_ld, val_snr, val_nmse, init_snr, aux_last, cov_summary = _validate_2d(
+            model, sampler, criterion, val_bs, das_modules, device,
+            use_amp=use_amp)
         elapsed = time.time() - t0
         if epoch % args.log_interval == 0 or epoch == 1:
             l1, l2 = format_epoch_log(
                 epoch, args.epochs, epoch_loss, epoch_snr, val_ld, val_snr,
                 val_nmse, init_snr, aux_last, optimizer.param_groups[0]["lr"],
-                elapsed)
+                elapsed, cov_summary=cov_summary)
             log(l1)
             log(l2)
 
@@ -602,19 +815,23 @@ def _batch_das_meta(ds, idx, das_forward, device):
     return {"das_forward": das_forward, "angles": angles}
 
 
-def _validate_2d(model, sampler, criterion, batch_size, das_modules, device):
+def _validate_2d(model, sampler, criterion, batch_size, das_modules, device,
+                 use_amp=False):
     model.eval()
     val_loss_sum = {}
     val_snr_s = val_nmse_s = init_snr_s = 0.0
     vb = 0
     aux_last = {}
+    cov_tv_per_batch = []
+    cov_wav_per_batch = []
     with torch.no_grad():
         for ds, op, idx in sampler.iter_val_batches(batch_size):
             x_input, y_target, y_k = ds.get_batch(idx, device=device)
             y_sub = y_k if y_k is not None else op.A(x_input)
             das_meta = _batch_das_meta(ds, idx, das_modules.get(id(ds)), device)
             vld, vs, vn, ins, al = validate_one_batch(
-                model, y_sub, y_target, op, criterion, das_meta=das_meta)
+                model, y_sub, y_target, op, criterion, das_meta=das_meta,
+                use_amp=use_amp)
             for k, v in vld.items():
                 val_loss_sum[k] = val_loss_sum.get(k, 0.0) + v
             val_snr_s += vs
@@ -622,14 +839,20 @@ def _validate_2d(model, sampler, criterion, batch_size, das_modules, device):
             init_snr_s += ins
             vb += 1
             aux_last = al[-1] if al else {}
+            if al:
+                ctv, cwav = _compute_cov_per_batch(al)
+                if ctv: cov_tv_per_batch.append(ctv)
+                if cwav: cov_wav_per_batch.append(cwav)
     for k in val_loss_sum:
         val_loss_sum[k] /= max(vb, 1)
+    cov_summary = _aggregate_cov(cov_tv_per_batch, cov_wav_per_batch)
     return (
         val_loss_sum,
         val_snr_s / max(vb, 1),
         val_nmse_s / max(vb, 1),
         init_snr_s / max(vb, 1),
         aux_last,
+        cov_summary,
     )
 
 
